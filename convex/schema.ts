@@ -7,6 +7,7 @@ export default defineSchema({
     email: v.string(),
     name: v.string(),
     selectedTemplate: v.optional(v.string()),
+    equipmentProfile: v.optional(v.array(v.string())),
     createdAt: v.number(),
   }).index("by_clerk_id", ["clerkId"]),
 
@@ -26,6 +27,7 @@ export default defineSchema({
             load: v.string(),
             rest: v.number(),
             notes: v.string(),
+            durationSec: v.optional(v.number()),
           }),
         ),
       }),
@@ -46,5 +48,24 @@ export default defineSchema({
     load: v.string(),
     totalReps: v.number(),
     notes: v.string(),
+  }).index("by_user", ["userId"]).index("by_user_date", ["userId", "date"]),
+
+  activities: defineTable({
+    userId: v.id("users"),
+    date: v.number(),
+    kind: v.string(),
+    minutes: v.number(),
+    intensity: v.string(),
+    load: v.number(),
+  }).index("by_user", ["userId"]).index("by_user_date", ["userId", "date"]),
+
+  readinessCheckins: defineTable({
+    userId: v.id("users"),
+    date: v.number(),
+    energy: v.number(),
+    soreness: v.number(),
+    sleep: v.number(),
+    prescription: v.string(),
+    score: v.number(),
   }).index("by_user", ["userId"]).index("by_user_date", ["userId", "date"]),
 });

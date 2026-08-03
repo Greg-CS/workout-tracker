@@ -28,6 +28,7 @@ export const createRegimen = mutation({
             load: v.string(),
             rest: v.number(),
             notes: v.string(),
+            durationSec: v.optional(v.number()),
           }),
         ),
       }),

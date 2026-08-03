@@ -5,9 +5,9 @@ import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { templates, type Template } from "@/lib/templates";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/atoms/Card";
+import { Button } from "@/components/atoms/Button";
+import { Badge } from "@/components/atoms/Badge";
 import { Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -83,7 +83,7 @@ export default function TemplatesPage() {
   if (authLoading || !userLoaded || userData === undefined) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-zinc-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-foreground/30" />
       </div>
     );
   }
@@ -91,16 +91,16 @@ export default function TemplatesPage() {
   return (
     <div className="mx-auto max-w-6xl p-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">Choose Your Template</h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Choose Your Template</h1>
+        <p className="mt-2 text-sm text-foreground/50">
           Select a training regimen that matches your goals. You can switch anytime.
         </p>
       </div>
 
       {currentTemplate && (
-        <div className="mb-6 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 dark:border-emerald-900 dark:bg-emerald-950/30">
-          <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-          <span className="text-sm text-emerald-700 dark:text-emerald-400">
+        <div className="mb-6 flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3">
+          <Check className="h-4 w-4 text-primary" />
+          <span className="text-sm text-primary">
             Current template: <strong>{templates.find((t) => t.key === currentTemplate)?.name}</strong>
           </span>
         </div>
@@ -116,8 +116,8 @@ export default function TemplatesPage() {
             <Card
               key={template.key}
               className={cn(
-                "transition-all hover:shadow-md",
-                isActive && "border-emerald-500 ring-1 ring-emerald-500",
+                "transition-all hover:shadow-md hover:border-primary/40",
+                isActive && "border-primary/60 ring-1 ring-primary/30",
               )}
             >
               <CardHeader>
@@ -138,11 +138,11 @@ export default function TemplatesPage() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-zinc-500 dark:text-zinc-400">
+                  <span className="text-foreground/50">
                     {template.days.length} days · {totalExercises} exercises
                   </span>
                   {isSavingThis ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-zinc-400" />
+                    <Loader2 className="h-4 w-4 animate-spin text-foreground/30" />
                   ) : (
                     <Button
                       size="sm"

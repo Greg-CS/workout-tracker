@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/Navbar";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,7 +19,25 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Workout Tracker",
-  description: "Track your workouts, manage regimens, and download PDF plans.",
+  description: "Track your workouts, manage regimens, and monitor progress.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Workout Tracker",
+  },
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
+};
+
+export const viewport = {
+  themeColor: "#759aab",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -38,6 +57,7 @@ export default function RootLayout({
             <ThemeProvider>
               <Navbar />
               <main className="flex-1">{children}</main>
+              <ServiceWorkerRegister />
             </ThemeProvider>
           </ConvexClientProvider>
         </ClerkProvider>

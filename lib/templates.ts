@@ -1,4 +1,5 @@
 export type ExerciseCategory = "strength" | "skill" | "mobility" | "flow" | "conditioning";
+export type BodyRegion = "push" | "pull" | "legs" | "core" | "shoulders" | "cardio";
 
 export interface Exercise {
   name: string;
@@ -8,6 +9,10 @@ export interface Exercise {
   load: string;
   rest: number;
   notes: string;
+  equipment?: string;
+  primaryRegion?: BodyRegion;
+  fatigueCost?: number;
+  durationSec?: number;
 }
 
 export interface RegimenDay {
@@ -27,9 +32,15 @@ export interface Template {
 const e = (
   name: string, category: ExerciseCategory, sets: number, target: string,
   load: string, rest: number, notes: string,
-): Exercise => ({ name, category, sets, target, load, rest, notes });
+  equipment?: string, primaryRegion?: BodyRegion, fatigueCost?: number,
+  durationSec?: number,
+): Exercise => ({ name, category, sets, target, load, rest, notes, equipment, primaryRegion, fatigueCost, durationSec });
 
 const d = (day: number, title: string, exercises: Exercise[]): RegimenDay => ({ day, title, exercises });
+
+import { getYogaDay } from "./yogaFlows";
+
+const yogaDayFor = (dayNum: number, flows: string[]): RegimenDay => getYogaDay(dayNum, flows);
 
 export const templates: Template[] = [
   {
@@ -93,6 +104,7 @@ export const templates: Template[] = [
         e("Hip Flexor Stretch", "mobility", 1, "30-45 sec each side", "bodyweight", 0, "Hips."),
         e("Seated Pike", "mobility", 1, "30 sec", "bodyweight", 0, "Hamstrings."),
       ]),
+      yogaDayFor(8, ["morningFlow", "shoulderFlow"]),
     ],
   },
   {
@@ -153,6 +165,7 @@ export const templates: Template[] = [
         e("Shoulder Dislocates (band)", "mobility", 1, "10 reps", "resistance band", 0, "Shoulder mobility."),
         e("Seated Pike", "mobility", 1, "30 sec", "bodyweight", 0, "Hamstrings."),
       ]),
+      yogaDayFor(8, ["morningFlow", "shoulderFlow"]),
     ],
   },
   {
@@ -217,6 +230,7 @@ export const templates: Template[] = [
         e("Hip Flexor Stretch", "mobility", 1, "30-45 sec each side", "bodyweight", 0, "Hips."),
         e("Wrist Stretch", "mobility", 1, "30 sec each direction", "bodyweight", 0, "Wrist care."),
       ]),
+      yogaDayFor(8, ["restorativeFlow", "hipOpenerFlow"]),
     ],
   },
   {
@@ -278,6 +292,7 @@ export const templates: Template[] = [
         e("Cat-Cow", "mobility", 1, "5-8 slow reps", "bodyweight", 0, "Spine."),
         e("Hip Flexor Stretch", "mobility", 1, "30-45 sec each side", "bodyweight", 0, "Hips."),
       ]),
+      yogaDayFor(8, ["restorativeFlow", "hipOpenerFlow"]),
     ],
   },
   {
@@ -339,6 +354,7 @@ export const templates: Template[] = [
         e("Seated Pike", "mobility", 1, "30 sec", "bodyweight", 0, "Hamstrings."),
         e("Child's Pose", "mobility", 1, "60 sec", "bodyweight", 0, "Full body relaxation."),
       ]),
+      yogaDayFor(8, ["morningFlow", "hipOpenerFlow"]),
     ],
   },
   {
@@ -403,6 +419,7 @@ export const templates: Template[] = [
         e("Child's Pose", "mobility", 1, "90 sec", "bodyweight", 0, "Full relaxation."),
         e("Mermaid Stretch", "mobility", 3, "30 sec each side", "bodyweight", 0, "Lateral opener."),
       ]),
+      yogaDayFor(8, ["restorativeFlow", "shoulderFlow"]),
     ],
   },
   {
@@ -459,6 +476,7 @@ export const templates: Template[] = [
         e("Seated Pike", "mobility", 1, "30 sec", "bodyweight", 0, "Hamstrings."),
         e("Child's Pose", "mobility", 1, "60 sec", "bodyweight", 0, "Relaxation."),
       ]),
+      yogaDayFor(8, ["morningFlow", "hamstringFlow"]),
     ],
   },
 ];

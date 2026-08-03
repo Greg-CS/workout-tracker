@@ -54,6 +54,24 @@ export const getUser = query({
   },
 });
 
+export const updateEquipmentProfile = mutation({
+  args: {
+    clerkId: v.string(),
+    equipment: v.array(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .first();
+
+    if (!user) return null;
+
+    await ctx.db.patch(user._id, { equipmentProfile: args.equipment });
+    return user._id;
+  },
+});
+
 export const updateTemplate = mutation({
   args: {
     clerkId: v.string(),

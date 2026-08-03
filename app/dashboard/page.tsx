@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
-import { Loader2, Dumbbell, FileText, ClipboardList, History, ArrowRight, Calendar } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/atoms/Card";
+import { Button } from "@/components/atoms/Button";
+import { Badge } from "@/components/atoms/Badge";
+import { ReadinessGauge } from "@/components/molecules/ReadinessGauge";
+import { Loader2, Dumbbell, FileText, ClipboardList, History, ArrowRight, Activity } from "lucide-react";
 import { templates } from "@/lib/templates";
+import { prescriptionLabels } from "@/lib/readinessModel";
 
 export default function DashboardPage() {
   const { user, isLoaded: userLoaded } = useUser();
@@ -24,13 +26,21 @@ export default function DashboardPage() {
     api.workoutLogs.getRecentLogs,
     userId ? { userId, limit: 5 } : "skip",
   );
+  const latestCheckin = useQuery(
+    api.readiness.getLatestCheckin,
+    userId ? { userId } : "skip",
+  );
+  const recentActivities = useQuery(
+    api.activities.getRecentActivities,
+    userId ? { userId, limit: 3 } : "skip",
+  );
 
-  const isLoading = !userLoaded || userData === undefined || (userId && regimen === undefined) || (userId && recentLogs === undefined);
+  const isLoading = !userLoaded || userData === undefined || (userId && regimen === undefined) || (userId && recentLogs === undefined) || (userId && latestCheckin === undefined) || (userId && recentActivities === undefined);
 
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-zinc-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-foreground/30" />
       </div>
     );
   }
@@ -43,10 +53,10 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto max-w-6xl p-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
           Welcome back, {user?.firstName ?? "Athlete"}
         </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-2 text-sm text-foreground/50">
           Here is your training overview for today.
         </p>
       </div>
@@ -55,13 +65,13 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Current Regimen</CardTitle>
-            <Dumbbell className="h-4 w-4 text-emerald-500" />
+            <Dumbbell className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {currentTemplate?.name ?? "None selected"}
             </div>
-            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-xs text-foreground/50">
               {currentTemplate ? `${currentTemplate.days.length} day plan` : "Choose a template to start"}
             </p>
             {!currentTemplate && (
@@ -74,22 +84,27 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Today&apos;s Workout</CardTitle>
-            <Calendar className="h-4 w-4 text-emerald-500" />
+            <CardTitle className="text-sm font-medium">Today&apos;s Readiness</CardTitle>
+            <Activity className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            {todayWorkout ? (
+            {latestCheckin ? (
               <>
-                <div className="text-2xl font-bold">{todayWorkout.title}</div>
-                <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                  {todayWorkout.exercises.length} exercises
+                <div className="text-2xl font-bold">{Math.round(latestCheckin.score)}%</div>
+                <p className="mt-1 text-xs text-foreground/50">
+                  {prescriptionLabels[latestCheckin.prescription as keyof typeof prescriptionLabels] ?? latestCheckin.prescription}
                 </p>
                 <Link href="/log" className="mt-3 inline-block">
                   <Button size="sm">Start Workout <ArrowRight className="h-3 w-3" /></Button>
                 </Link>
               </>
             ) : (
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">No regimen selected</p>
+              <>
+                <div className="text-sm text-foreground/50">No check-in yet today</div>
+                <Link href="/log" className="mt-3 inline-block">
+                  <Button size="sm">Check In <ArrowRight className="h-3 w-3" /></Button>
+                </Link>
+              </>
             )}
           </CardContent>
         </Card>
@@ -97,11 +112,11 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Logs</CardTitle>
-            <History className="h-4 w-4 text-emerald-500" />
+            <History className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{recentLogs?.length ?? 0}</div>
-            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-xs text-foreground/50">
               recent workout entries
             </p>
             <Link href="/history" className="mt-3 inline-block">
@@ -110,6 +125,39 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {latestCheckin && (
+        <div className="mt-6">
+          <ReadinessGauge
+            score={latestCheckin.score}
+            prescription={latestCheckin.prescription as "full" | "reduced" | "technique" | "recovery"}
+          />
+        </div>
+      )}
+
+      {recentActivities && recentActivities.length > 0 && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Recent Activities</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {recentActivities.map((act) => (
+                <div
+                  key={act._id}
+                  className="flex items-center justify-between rounded-lg border border-secondary/20 bg-white px-4 py-3 dark:border-foreground/10 dark:bg-foreground/5"
+                >
+                  <div className="flex items-center gap-3">
+                    <Badge variant="secondary">{act.kind}</Badge>
+                    <span className="text-sm text-foreground/50">{act.minutes} min · {act.intensity}</span>
+                  </div>
+                  <span className="text-sm text-foreground/40">{new Date(act.date).toLocaleDateString()}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {currentTemplate && todayWorkout && (
         <Card className="mt-6">
@@ -122,13 +170,13 @@ export default function DashboardPage() {
               {todayWorkout.exercises.map((ex, i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between rounded-lg border border-zinc-200 px-4 py-3 dark:border-zinc-800"
+                  className="flex items-center justify-between rounded-lg border border-secondary/20 bg-white px-4 py-3 dark:border-foreground/10 dark:bg-foreground/5"
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium">{ex.name}</span>
                     <Badge variant="secondary">{ex.category}</Badge>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-zinc-500 dark:text-zinc-400">
+                  <div className="flex items-center gap-4 text-sm text-foreground/50">
                     <span>{ex.sets} sets</span>
                     <span>{ex.target}</span>
                     <span>{ex.rest}s rest</span>
@@ -153,13 +201,13 @@ export default function DashboardPage() {
               {recentLogs.map((log) => (
                 <div
                   key={log._id}
-                  className="flex items-center justify-between rounded-lg border border-zinc-200 px-4 py-3 dark:border-zinc-800"
+                  className="flex items-center justify-between rounded-lg border border-secondary/20 bg-white px-4 py-3 dark:border-foreground/10 dark:bg-foreground/5"
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium">{log.exerciseName}</span>
                     <Badge variant="outline">{log.category}</Badge>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-zinc-500 dark:text-zinc-400">
+                  <div className="flex items-center gap-4 text-sm text-foreground/50">
                     <span>{log.sets} × {log.reps}</span>
                     <span>{new Date(log.date).toLocaleDateString()}</span>
                   </div>
@@ -173,9 +221,9 @@ export default function DashboardPage() {
       {!currentTemplate && (
         <Card className="mt-6 border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <FileText className="mb-4 h-10 w-10 text-zinc-300 dark:text-zinc-700" />
+            <FileText className="mb-4 h-10 w-10 text-foreground/20" />
             <p className="mb-2 text-lg font-medium">No regimen yet</p>
-            <p className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="mb-4 text-sm text-foreground/50">
               Select a training template to get started with your workout journey.
             </p>
             <Link href="/templates">

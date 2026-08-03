@@ -3,12 +3,11 @@
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { Card, CardContent } from "@/components/atoms/Card";
+import { Button } from "@/components/atoms/Button";
 import { Loader2, Download, FileText } from "lucide-react";
 import { templates } from "@/lib/templates";
-import { ExerciseDescription } from "@/components/ExerciseImage";
+import { RegimenView } from "@/components/organism/RegimenView";
 import Link from "next/link";
 
 export default function RegimenPage() {
@@ -68,7 +67,7 @@ export default function RegimenPage() {
               ex.notes,
             ]),
             theme: "striped",
-            headStyles: { fillColor: [16, 185, 129] },
+            headStyles: { fillColor: [8, 135, 50] },
             styles: { fontSize: 8, cellPadding: 2 },
           });
 
@@ -83,7 +82,7 @@ export default function RegimenPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-zinc-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-foreground/30" />
       </div>
     );
   }
@@ -93,9 +92,9 @@ export default function RegimenPage() {
       <div className="mx-auto max-w-4xl p-6">
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-16">
-            <FileText className="mb-4 h-10 w-10 text-zinc-300 dark:text-zinc-700" />
+            <FileText className="mb-4 h-10 w-10 text-foreground/20" />
             <p className="mb-2 text-lg font-medium">No regimen yet</p>
-            <p className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="mb-4 text-sm text-foreground/50">
               Select a training template to view and download your regimen.
             </p>
             <Link href="/templates">
@@ -113,8 +112,8 @@ export default function RegimenPage() {
     <div className="mx-auto max-w-4xl p-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{template?.name ?? "Your"} Regimen</h1>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">{template?.name ?? "Your"} Regimen</h1>
+          <p className="mt-2 text-sm text-foreground/50">
             {regimen.days.length}-day training plan
           </p>
         </div>
@@ -124,45 +123,7 @@ export default function RegimenPage() {
       </div>
 
       <div className="space-y-4">
-        {regimen.days.map((day) => (
-          <Card key={day.day}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Day {day.day}: {day.title}</CardTitle>
-                  <CardDescription>{day.exercises.length} exercises</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {day.exercises.map((ex, i) => (
-                  <div
-                    key={i}
-                    className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{ex.name}</span>
-                      <Badge variant="secondary">{ex.category}</Badge>
-                    </div>
-                    <ExerciseDescription name={ex.name} />
-                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400">
-                        <span><span className="font-medium text-zinc-700 dark:text-zinc-300">Sets:</span> {ex.sets}</span>
-                        <span><span className="font-medium text-zinc-700 dark:text-zinc-300">Target:</span> {ex.target}</span>
-                        <span><span className="font-medium text-zinc-700 dark:text-zinc-300">Load:</span> {ex.load}</span>
-                        <span><span className="font-medium text-zinc-700 dark:text-zinc-300">Rest:</span> {ex.rest}s</span>
-                      </div>
-                      {ex.notes && (
-                        <p className="mt-1 text-xs italic text-zinc-400 dark:text-zinc-500">
-                          {ex.notes}
-                        </p>
-                      )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        <RegimenView days={regimen.days} userEquipment={userData?.equipmentProfile} />
       </div>
     </div>
   );
