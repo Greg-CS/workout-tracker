@@ -21,6 +21,7 @@ interface GenericExercise {
 interface GenericDay {
   day: number;
   title: string;
+  sourceTemplate?: string;
   exercises: GenericExercise[];
 }
 
@@ -39,6 +40,11 @@ export function RegimenView({ days, userEquipment = ["bodyweight"] }: RegimenVie
             <CardTitle className="flex items-center gap-2">
               <Badge variant="default">Day {day.day}</Badge>
               <span>{day.title}</span>
+              {day.sourceTemplate && (
+                <Badge variant="outline" className="text-xs text-foreground/50">
+                  {day.sourceTemplate}
+                </Badge>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">

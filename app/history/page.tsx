@@ -37,6 +37,12 @@ const categoryLabels: Record<CategoryFilter, string> = {
   conditioning: "Conditioning",
 };
 
+function formatDuration(totalSeconds: number): string {
+  const m = Math.floor(totalSeconds / 60);
+  const s = Math.round(totalSeconds % 60);
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
+}
+
 export default function HistoryPage() {
   const { user, isLoaded: userLoaded } = useUser();
   const userData = useQuery(api.users.getUser, {
@@ -153,8 +159,12 @@ export default function HistoryPage() {
                     <span className="text-sm font-medium">{pr.exercise}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-lg font-bold text-primary">{pr.totalReps}</span>
-                    <span className="ml-1 text-xs text-foreground/50">total reps</span>
+                    <span className="text-lg font-bold text-primary">
+                      {pr.isTimed ? formatDuration(pr.totalReps) : pr.totalReps}
+                    </span>
+                    <span className="ml-1 text-xs text-foreground/50">
+                      {pr.isTimed ? "total time" : "total reps"}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -281,7 +291,11 @@ export default function HistoryPage() {
                           <div className="flex items-center gap-4 text-sm text-foreground/50">
                             <span>{log.sets} sets</span>
                             <span>{log.reps}</span>
-                            <span className="font-medium text-primary">{log.totalReps} total</span>
+                            <span className="font-medium text-primary">
+                              {log.category === "mobility" || log.category === "flow"
+                                ? formatDuration(log.totalReps)
+                                : `${log.totalReps} total`}
+                            </span>
                           </div>
                         </div>
                       ))}

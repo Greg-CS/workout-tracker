@@ -25,15 +25,17 @@ export default function RegimenPage() {
 
   const handleDownloadPDF = () => {
     if (!regimen) return;
-    const template = templates.find((t) => t.key === regimen.templateKey);
-    if (!template) return;
+    const keys = regimen.templateKeys ?? [regimen.templateKey];
+    const matchedTemplates = keys.map((k) => templates.find((t) => t.key === k)).filter((t): t is (typeof templates)[number] => !!t);
+    if (matchedTemplates.length === 0) return;
+    const displayName = matchedTemplates.map((t) => t.name).join(" + ");
 
     import("jspdf").then(({ jsPDF }) => {
       import("jspdf-autotable").then(() => {
         const doc = new jsPDF();
 
         doc.setFontSize(20);
-        doc.text(`${template.name} Regimen`, 14, 22);
+        doc.text(`${displayName} Regimen`, 14, 22);
 
         doc.setFontSize(10);
         doc.setTextColor(100);
@@ -74,7 +76,7 @@ export default function RegimenPage() {
           y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
         });
 
-        doc.save(`${template.key}-regimen.pdf`);
+        doc.save(`${matchedTemplates.map((t) => t.key).join("-")}-regimen.pdf`);
       });
     });
   };
@@ -106,13 +108,15 @@ export default function RegimenPage() {
     );
   }
 
-  const template = templates.find((t) => t.key === regimen.templateKey);
+  const regimenKeys = regimen.templateKeys ?? [regimen.templateKey];
+  const regimenTemplates = regimenKeys.map((k) => templates.find((t) => t.key === k)).filter((t): t is (typeof templates)[number] => !!t);
+  const displayName = regimenTemplates.length > 0 ? regimenTemplates.map((t) => t.name).join(" + ") : "Your";
 
   return (
     <div className="mx-auto max-w-4xl p-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">{template?.name ?? "Your"} Regimen</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">{displayName} Regimen</h1>
           <p className="mt-2 text-sm text-foreground/50">
             {regimen.days.length}-day training plan
           </p>

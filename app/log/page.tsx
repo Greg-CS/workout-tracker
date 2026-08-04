@@ -15,6 +15,8 @@ import { WorkoutSession } from "@/components/organism/WorkoutSession";
 import { adaptExercise, filterAdaptedExercises, applyEquipmentProgression } from "@/lib/readinessModel";
 import { enhanceDayWithWarmup } from "@/lib/warmupLibrary";
 import { ExerciseImage } from "@/components/molecules/ExerciseImage";
+import { ExerciseTimer } from "@/components/molecules/ExerciseTimer";
+import { RestTimer } from "@/components/molecules/RestTimer";
 import Link from "next/link";
 
 export default function LogWorkoutPage() {
@@ -35,15 +37,22 @@ export default function LogWorkoutPage() {
     api.workoutLogs.getPRs,
     userId ? { userId } : "skip",
   );
+  const weeklyLogs = useQuery(
+    api.workoutLogs.getWeeklyLogs,
+    userId ? { userId } : "skip",
+  );
 
   const [selectedDay, setSelectedDay] = useState<number>(0);
   const [intakeDone, setIntakeDone] = useState(false);
   const [intakeResult, setIntakeResult] = useState<IntakeResult | null>(null);
   const [setData, setSetData] = useState<Record<number, string[]>>({});
+  const [loadData, setLoadData] = useState<Record<number, string>>({});
+  const [restSetIdx, setRestSetIdx] = useState<Record<number, number | null>>({});
+  const [forceRelog, setForceRelog] = useState<Set<number>>(new Set());
   const [logged, setLogged] = useState<Set<number>>(new Set());
   const [saving, setSaving] = useState(false);
 
-  const isLoading = !userLoaded || userData === undefined || (userId && regimen === undefined) || (userId && prs === undefined);
+  const isLoading = !userLoaded || userData === undefined || (userId && regimen === undefined) || (userId && prs === undefined) || (userId && weeklyLogs === undefined);
 
   if (isLoading) {
     return (
@@ -72,8 +81,20 @@ export default function LogWorkoutPage() {
     );
   }
 
-  const template = templates.find((t) => t.key === regimen.templateKey);
+  const regimenKeys = regimen.templateKeys ?? [regimen.templateKey];
+  const regimenTemplates = regimenKeys.map((k) => templates.find((t) => t.key === k)).filter((t): t is (typeof templates)[number] => !!t);
+  const templateDisplayName = regimenTemplates.map((t) => t.name).join(" + ");
   const day = regimen.days[selectedDay];
+
+  const currentDayLabel = `Day ${day.day}: ${day.title}`;
+  const alreadyLoggedNames = new Set<string>();
+  if (weeklyLogs) {
+    for (const log of weeklyLogs) {
+      if (log.dayLabel === currentDayLabel) {
+        alreadyLoggedNames.add(log.exerciseName);
+      }
+    }
+  }
 
   const handleIntakeComplete = async (result: IntakeResult) => {
     setIntakeResult(result);
@@ -130,6 +151,9 @@ export default function LogWorkoutPage() {
       exerciseSets[setIndex] = value;
       return { ...prev, [exerciseIndex]: exerciseSets };
     });
+    if (value.trim() && parseInt(value, 10) > 0) {
+      setRestSetIdx((prev) => ({ ...prev, [exerciseIndex]: setIndex }));
+    }
   };
 
   const handleLogExercise = async (exerciseIndex: number) => {
@@ -152,7 +176,7 @@ export default function LogWorkoutPage() {
         category: exercise.category,
         reps,
         sets: exercise.sets,
-        load: exercise.load,
+        load: loadData[exerciseIndex] || exercise.load,
         totalReps,
         notes: exercise.cue || exercise.notes,
       });
@@ -169,7 +193,7 @@ export default function LogWorkoutPage() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Log Workout</h1>
         <p className="mt-2 text-sm text-foreground/50">
-          {template?.name} regimen — adaptive training based on your readiness.
+          {templateDisplayName} regimen — adaptive training based on your readiness.
         </p>
       </div>
 
@@ -182,6 +206,9 @@ export default function LogWorkoutPage() {
                 onClick={() => {
                   setSelectedDay(i);
                   setSetData({});
+                  setLoadData({});
+                  setRestSetIdx({});
+                  setForceRelog(new Set());
                   setLogged(new Set());
                 }}
                 className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
@@ -221,6 +248,9 @@ export default function LogWorkoutPage() {
                 setIntakeDone(false);
                 setIntakeResult(null);
                 setSetData({});
+                setLoadData({});
+                setRestSetIdx({});
+                setForceRelog(new Set());
                 setLogged(new Set());
               }}
             >
@@ -250,7 +280,10 @@ export default function LogWorkoutPage() {
           <div className="mt-6 space-y-4">
             <h2 className="text-lg font-semibold">Log Your Sets</h2>
             {adaptedExercises.map((exercise, exIdx) => {
-              const isLogged = logged.has(exIdx);
+              const sessionLogged = logged.has(exIdx);
+              const weekLogged = !sessionLogged && alreadyLoggedNames.has(exercise.name);
+              const isLogged = sessionLogged || weekLogged;
+              const inputsDisabled = sessionLogged || (weekLogged && !forceRelog.has(exIdx));
               const sets = setData[exIdx] ?? Array(exercise.sets).fill("");
 
               return (
@@ -271,18 +304,24 @@ export default function LogWorkoutPage() {
                         {(() => {
                           const pr = prs?.find((p) => p.exercise === exercise.name || p.exercise === exercise.originalName);
                           if (pr && pr.bestSet > 0) {
+                            const loadInfo = pr.bestLoad && pr.bestLoad !== "bodyweight" ? ` @ ${pr.bestLoad}` : "";
                             return (
                               <Badge variant="outline" className="gap-1 text-primary">
                                 <Trophy className="h-3 w-3" />
-                                PR: {pr.bestSet}
+                                Max: {pr.bestSet} reps{loadInfo}
                               </Badge>
                             );
                           }
                           return null;
                         })()}
-                        {isLogged && (
+                        {sessionLogged && (
                           <Badge variant="success">
                             <Check className="mr-1 h-3 w-3" /> Logged
+                          </Badge>
+                        )}
+                        {weekLogged && !forceRelog.has(exIdx) && (
+                          <Badge variant="outline" className="gap-1 text-foreground/50">
+                            <Check className="h-3 w-3" /> Logged this week
                           </Badge>
                         )}
                       </div>
@@ -292,33 +331,79 @@ export default function LogWorkoutPage() {
                     )}
                   </CardHeader>
                   <CardContent>
+                    {exercise.load && exercise.load !== "bodyweight" && !inputsDisabled && (
+                      <div className="mb-3 flex items-center gap-2">
+                        <span className="text-sm text-foreground/50">Load used:</span>
+                        <Input
+                          type="text"
+                          placeholder={exercise.load}
+                          value={loadData[exIdx] ?? ""}
+                          onChange={(e) =>
+                            setLoadData((prev) => ({ ...prev, [exIdx]: e.target.value }))
+                          }
+                          className="w-40"
+                        />
+                      </div>
+                    )}
                     <div className="space-y-2">
-                      {Array.from({ length: exercise.sets }).map((_, setIdx) => (
-                        <div key={setIdx} className="flex items-center gap-3">
-                          <span className="w-16 text-sm text-foreground/50">
-                            Set {setIdx + 1}
-                          </span>
-                          <Input
-                            type="text"
-                            placeholder="reps (e.g. 10)"
-                            value={sets[setIdx] ?? ""}
-                            onChange={(e) => updateSet(exIdx, setIdx, e.target.value)}
-                            className="w-32"
-                            disabled={isLogged}
-                          />
-                          <span className="text-sm text-foreground/40">reps</span>
-                        </div>
-                      ))}
+                      {Array.from({ length: exercise.sets }).map((_, setIdx) => {
+                        const isTimed = exercise.category === "mobility" || exercise.category === "flow";
+                        return (
+                          <div key={setIdx} className="flex items-center gap-3">
+                            <span className="w-16 text-sm text-foreground/50">
+                              Set {setIdx + 1}
+                            </span>
+                            {isTimed ? (
+                              <ExerciseTimer
+                                value={sets[setIdx] ?? ""}
+                                onChange={(v) => updateSet(exIdx, setIdx, v)}
+                                disabled={inputsDisabled}
+                                targetSeconds={exercise.durationSec}
+                              />
+                            ) : (
+                              <>
+                                <Input
+                                  type="text"
+                                  placeholder="reps (e.g. 10)"
+                                  value={sets[setIdx] ?? ""}
+                                  onChange={(e) => updateSet(exIdx, setIdx, e.target.value)}
+                                  className="w-32"
+                                  disabled={inputsDisabled}
+                                />
+                                <span className="text-sm text-foreground/40">reps</span>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                    {!isLogged && (
+                    {restSetIdx[exIdx] !== undefined && restSetIdx[exIdx] !== null && !inputsDisabled && (
+                      <div className="mt-3">
+                        <RestTimer
+                          key={`${exIdx}-${restSetIdx[exIdx]}`}
+                          restSeconds={exercise.rest ?? 180}
+                        />
+                      </div>
+                    )}
+                    {!sessionLogged && (
                       <Button
                         size="sm"
                         className="mt-4"
                         onClick={() => handleLogExercise(exIdx)}
-                        disabled={saving || !sets.some((s) => s && s.trim())}
+                        disabled={saving || !sets.some((s) => s && s.trim() && parseInt(s, 10) > 0)}
                       >
                         {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                         Log Exercise
+                      </Button>
+                    )}
+                    {weekLogged && !forceRelog.has(exIdx) && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-4 ml-2"
+                        onClick={() => setForceRelog((prev) => new Set(prev).add(exIdx))}
+                      >
+                        Log Again
                       </Button>
                     )}
                   </CardContent>
@@ -327,7 +412,7 @@ export default function LogWorkoutPage() {
             })}
           </div>
 
-          {logged.size === adaptedExercises.length && adaptedExercises.length > 0 && (
+          {adaptedExercises.length > 0 && adaptedExercises.every((ex) => logged.has(adaptedExercises.indexOf(ex)) || alreadyLoggedNames.has(ex.name)) && (
             <Card className="mt-6 border-primary/60">
               <CardContent className="flex items-center justify-between py-6">
                 <div>

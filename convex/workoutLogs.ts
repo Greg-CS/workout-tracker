@@ -93,9 +93,11 @@ export const getProgression = query({
       .collect();
 
     const byExercise: Record<string, { date: number; bestSet: number; totalReps: number }[]> = {};
+    const categoryByExercise: Record<string, string> = {};
 
     for (const log of logs) {
       if (!byExercise[log.exerciseName]) byExercise[log.exerciseName] = [];
+      categoryByExercise[log.exerciseName] = log.category;
       const setValues = log.reps
         .split(",")
         .map((r) => parseInt(r.replace("s", "").trim(), 10))
@@ -111,6 +113,8 @@ export const getProgression = query({
     return Object.entries(byExercise)
       .map(([exercise, entries]) => ({
         exercise,
+        category: categoryByExercise[exercise],
+        isTimed: categoryByExercise[exercise] === "mobility" || categoryByExercise[exercise] === "flow",
         entries: entries.sort((a, b) => a.date - b.date),
       }))
       .filter((e) => e.entries.length > 1);
@@ -139,7 +143,7 @@ export const getPRs = query({
 
     const prs: Record<
       string,
-      { bestSet: number; totalReps: number; lastDate: number }
+      { bestSet: number; totalReps: number; lastDate: number; category: string; bestLoad: string }
     > = {};
 
     for (const log of logs) {
@@ -155,19 +159,50 @@ export const getPRs = query({
           bestSet: maxSet,
           totalReps: log.totalReps,
           lastDate: log.date,
+          category: log.category,
+          bestLoad: log.load,
         };
       } else {
+        const newBest = maxSet > existing.bestSet;
         prs[log.exerciseName] = {
           bestSet: Math.max(existing.bestSet, maxSet),
           totalReps: Math.max(existing.totalReps, log.totalReps),
           lastDate: Math.max(existing.lastDate, log.date),
+          category: log.category,
+          bestLoad: newBest ? log.load : existing.bestLoad,
         };
       }
     }
 
     return Object.entries(prs)
-      .map(([exercise, data]) => ({ exercise, ...data }))
+      .map(([exercise, data]) => ({
+        exercise,
+        ...data,
+        isTimed: data.category === "mobility" || data.category === "flow",
+      }))
       .sort((a, b) => b.bestSet - a.bestSet);
+  },
+});
+
+export const getWeeklyLogs = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const monday = new Date(now);
+    monday.setHours(0, 0, 0, 0);
+    monday.setDate(monday.getDate() - diffToMonday);
+    const cutoff = monday.getTime();
+
+    const logs = await ctx.db
+      .query("workoutLogs")
+      .withIndex("by_user_date", (q) =>
+        q.eq("userId", args.userId).gte("date", cutoff),
+      )
+      .collect();
+
+    return logs;
   },
 });
 
@@ -177,12 +212,18 @@ export const getLeaderboard = query({
   },
   handler: async (ctx, args) => {
     const period = args.period ?? "all";
-    const now = Date.now();
+    const now = new Date();
     let cutoff = 0;
     if (period === "week") {
-      cutoff = now - 7 * 24 * 60 * 60 * 1000;
+      const dayOfWeek = now.getDay();
+      const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      const monday = new Date(now);
+      monday.setHours(0, 0, 0, 0);
+      monday.setDate(monday.getDate() - diffToMonday);
+      cutoff = monday.getTime();
     } else if (period === "month") {
-      cutoff = now - 30 * 24 * 60 * 60 * 1000;
+      const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+      cutoff = firstOfMonth.getTime();
     }
 
     const users = await ctx.db.query("users").collect();

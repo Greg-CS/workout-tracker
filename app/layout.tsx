@@ -18,13 +18,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Workout Tracker",
+  title: "Gym snooze",
   description: "Track your workouts, manage regimens, and monitor progress.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Workout Tracker",
+    title: "Gym snooze",
   },
   icons: {
     icon: "/icon.svg",

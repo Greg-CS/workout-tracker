@@ -18,6 +18,7 @@ export interface Exercise {
 export interface RegimenDay {
   day: number;
   title: string;
+  sourceTemplate?: string;
   exercises: Exercise[];
 }
 
@@ -483,3 +484,23 @@ export const templates: Template[] = [
 
 export const getTemplate = (key: string): Template | undefined =>
   templates.find((t) => t.key === key);
+
+export function combineTemplates(keys: string[]): { key: string; name: string; days: RegimenDay[] } | null {
+  const selected = keys.map((k) => getTemplate(k)).filter((t): t is Template => !!t);
+  if (selected.length === 0) return null;
+
+  let dayCounter = 1;
+  const days: RegimenDay[] = selected.flatMap((t) =>
+    t.days.map((d) => ({
+      ...d,
+      day: dayCounter++,
+      sourceTemplate: t.name,
+    })),
+  );
+
+  return {
+    key: selected.map((t) => t.key).join("+"),
+    name: selected.map((t) => t.name).join(" + "),
+    days,
+  };
+}

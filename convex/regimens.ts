@@ -15,10 +15,12 @@ export const createRegimen = mutation({
   args: {
     userId: v.id("users"),
     templateKey: v.string(),
+    templateKeys: v.optional(v.array(v.string())),
     days: v.array(
       v.object({
         day: v.number(),
         title: v.string(),
+        sourceTemplate: v.optional(v.string()),
         exercises: v.array(
           v.object({
             name: v.string(),
@@ -45,6 +47,7 @@ export const createRegimen = mutation({
     if (existing) {
       await ctx.db.patch(existing._id, {
         templateKey: args.templateKey,
+        templateKeys: args.templateKeys,
         days: args.days,
         updatedAt: now,
       });
@@ -54,6 +57,7 @@ export const createRegimen = mutation({
     return await ctx.db.insert("regimens", {
       userId: args.userId,
       templateKey: args.templateKey,
+      templateKeys: args.templateKeys,
       days: args.days,
       createdAt: now,
       updatedAt: now,

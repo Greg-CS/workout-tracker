@@ -3,7 +3,17 @@
 import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/atoms/Card";
 import { Badge } from "@/components/atoms/Badge";
-import { TrendingUp } from "lucide-react";
+import { Button } from "@/components/atoms/Button";
+import { TrendingUp, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuGroup,
+} from "@/components/atoms/dropdown-menu";
 
 interface ProgressionEntry {
   date: number;
@@ -13,6 +23,8 @@ interface ProgressionEntry {
 
 interface ProgressionData {
   exercise: string;
+  category?: string;
+  isTimed?: boolean;
   entries: ProgressionEntry[];
 }
 
@@ -25,8 +37,21 @@ const colors = [
   "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1",
 ];
 
+function formatSeconds(s: number): string {
+  const m = Math.floor(s / 60);
+  const sec = Math.round(s % 60);
+  return m > 0 ? `${m}:${sec.toString().padStart(2, "0")}` : `${sec}s`;
+}
+
 export function ProgressionGraph({ data }: ProgressionGraphProps) {
   const [selected, setSelected] = useState<Set<string>>(new Set(data.slice(0, 3).map((d) => d.exercise)));
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+
+  const categories = Array.from(new Set(data.map((d) => d.category).filter((c): c is string => !!c)));
+  const categoryLabels: Record<string, string> = { all: "All Categories" };
+  categories.forEach((c) => (categoryLabels[c] = c.charAt(0).toUpperCase() + c.slice(1)));
+
+  const filteredData = categoryFilter === "all" ? data : data.filter((d) => d.category === categoryFilter);
 
   const toggleExercise = (name: string) => {
     setSelected((prev) => {
@@ -37,7 +62,76 @@ export function ProgressionGraph({ data }: ProgressionGraphProps) {
     });
   };
 
-  const visible = data.filter((d) => selected.has(d.exercise));
+  const visible = filteredData.filter((d) => selected.has(d.exercise));
+  const allTimed = visible.length > 0 && visible.every((d) => d.isTimed);
+
+  const picker = (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium text-foreground/50">Filter by category</span>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button variant="outline" size="sm" className="gap-1.5">
+                {categoryLabels[categoryFilter] ?? "All Categories"}
+                <ChevronDown className="h-3.5 w-3.5" />
+              </Button>
+            }
+          />
+          <DropdownMenuContent align="end">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Category</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => setCategoryFilter("all")}
+                className={categoryFilter === "all" ? "bg-accent" : ""}
+              >
+                All Categories
+              </DropdownMenuItem>
+              {categories.map((c) => (
+                <DropdownMenuItem
+                  key={c}
+                  onClick={() => setCategoryFilter(c)}
+                  className={categoryFilter === c ? "bg-accent" : ""}
+                >
+                  {categoryLabels[c]}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {filteredData.length === 0 && (
+          <p className="text-sm text-foreground/40">No exercises in this category yet.</p>
+        )}
+        {filteredData.map((d) => {
+          const isSelected = selected.has(d.exercise);
+          const colorIdx = visible.findIndex((v) => v.exercise === d.exercise);
+          const color = colorIdx >= 0 ? colors[colorIdx % colors.length] : undefined;
+          return (
+            <button
+              key={d.exercise}
+              onClick={() => toggleExercise(d.exercise)}
+              className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-all ${
+                isSelected
+                  ? "border-primary/40 bg-primary/10 text-foreground"
+                  : "border-secondary/20 bg-white text-foreground/50 hover:bg-secondary/10 dark:border-foreground/10 dark:bg-transparent"
+              }`}
+            >
+              {isSelected && color && (
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
+              )}
+              {d.exercise}
+              {d.isTimed && <span className="text-[10px] text-foreground/40">(timed)</span>}
+              <Badge variant="outline" className="ml-1 text-[10px]">{d.entries.length}</Badge>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 
   if (visible.length === 0) {
     return (
@@ -49,10 +143,11 @@ export function ProgressionGraph({ data }: ProgressionGraphProps) {
           </CardTitle>
           <CardDescription>Select exercises to see progression over time</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="flex h-48 items-center justify-center text-sm text-foreground/40">
             Select an exercise below to view its progression
           </div>
+          {picker}
         </CardContent>
       </Card>
     );
@@ -85,7 +180,9 @@ export function ProgressionGraph({ data }: ProgressionGraphProps) {
           <TrendingUp className="h-5 w-5 text-primary" />
           Progression Graph
         </CardTitle>
-        <CardDescription>Best set per exercise over time</CardDescription>
+        <CardDescription>
+          {allTimed ? "Longest hold time per exercise over time" : "Best set per exercise over time"}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="w-full overflow-x-auto">
@@ -97,7 +194,9 @@ export function ProgressionGraph({ data }: ProgressionGraphProps) {
               return (
                 <g key={`y-${i}`}>
                   <line x1={PAD} y1={y} x2={W - PAD} y2={y} stroke="currentColor" strokeWidth={0.5} className="text-foreground/10" />
-                  <text x={PAD - 8} y={y + 4} textAnchor="end" className="fill-foreground/40 text-[10px]">{val}</text>
+                  <text x={PAD - 8} y={y + 4} textAnchor="end" className="fill-foreground/40 text-[10px]">
+                    {allTimed ? formatSeconds(val) : val}
+                  </text>
                 </g>
               );
             })}
@@ -145,31 +244,7 @@ export function ProgressionGraph({ data }: ProgressionGraphProps) {
           </svg>
         </div>
 
-        {/* Legend / exercise selector */}
-        <div className="flex flex-wrap gap-2">
-          {data.map((d) => {
-            const isSelected = selected.has(d.exercise);
-            const colorIdx = visible.findIndex((v) => v.exercise === d.exercise);
-            const color = colorIdx >= 0 ? colors[colorIdx % colors.length] : undefined;
-            return (
-              <button
-                key={d.exercise}
-                onClick={() => toggleExercise(d.exercise)}
-                className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-all ${
-                  isSelected
-                    ? "border-primary/40 bg-primary/10 text-foreground"
-                    : "border-secondary/20 bg-white text-foreground/50 hover:bg-secondary/10 dark:border-foreground/10 dark:bg-transparent"
-                }`}
-              >
-                {isSelected && color && (
-                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
-                )}
-                {d.exercise}
-                <Badge variant="outline" className="ml-1 text-[10px]">{d.entries.length}</Badge>
-              </button>
-            );
-          })}
-        </div>
+        {picker}
       </CardContent>
     </Card>
   );

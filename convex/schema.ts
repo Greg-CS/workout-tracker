@@ -14,10 +14,12 @@ export default defineSchema({
   regimens: defineTable({
     userId: v.id("users"),
     templateKey: v.string(),
+    templateKeys: v.optional(v.array(v.string())),
     days: v.array(
       v.object({
         day: v.number(),
         title: v.string(),
+        sourceTemplate: v.optional(v.string()),
         exercises: v.array(
           v.object({
             name: v.string(),
