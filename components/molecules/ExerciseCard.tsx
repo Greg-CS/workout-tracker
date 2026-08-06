@@ -52,7 +52,7 @@ export function ExerciseCard({
 
   return (
     <div className="overflow-hidden rounded-xl border border-secondary/25 bg-white shadow-sm shadow-secondary/10 transition-all hover:shadow-md dark:border-foreground/10 dark:bg-foreground/5">
-      <div className="flex gap-4 p-4">
+      <div className="flex flex-col md:flex-row gap-4 p-4 items-center justify-between">
         <ExerciseImage name={name} size="md" />
 
         <div className="min-w-0 flex-1">

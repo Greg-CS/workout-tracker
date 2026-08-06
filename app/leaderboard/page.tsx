@@ -46,7 +46,7 @@ export default function LeaderboardPage() {
 
   return (
     <div className="mx-auto max-w-4xl p-6">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex gap-4 items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Leaderboard</h1>
           <p className="mt-2 text-sm text-foreground/50">
@@ -58,7 +58,7 @@ export default function LeaderboardPage() {
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="outline" size="sm" className="gap-2 p-6">
                 <Calendar className="h-4 w-4" />
                 {periodLabels[period]}
               </Button>

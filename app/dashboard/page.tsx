@@ -170,13 +170,13 @@ export default function DashboardPage() {
               {todayWorkout.exercises.map((ex, i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between rounded-lg border border-secondary/20 bg-white px-4 py-3 dark:border-foreground/10 dark:bg-foreground/5"
+                  className="flex flex-col gap-2 rounded-lg border border-secondary/20 bg-white px-4 py-3 dark:border-foreground/10 dark:bg-foreground/5 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium">{ex.name}</span>
                     <Badge variant="secondary">{ex.category}</Badge>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-foreground/50">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-foreground/50">
                     <span>{ex.sets} sets</span>
                     <span>{ex.target}</span>
                     <span>{ex.rest}s rest</span>
@@ -201,13 +201,13 @@ export default function DashboardPage() {
               {recentLogs.map((log) => (
                 <div
                   key={log._id}
-                  className="flex items-center justify-between rounded-lg border border-secondary/20 bg-white px-4 py-3 dark:border-foreground/10 dark:bg-foreground/5"
+                  className="flex flex-col gap-2 rounded-lg border border-secondary/20 bg-white px-4 py-3 dark:border-foreground/10 dark:bg-foreground/5 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium">{log.exerciseName}</span>
                     <Badge variant="outline">{log.category}</Badge>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-foreground/50">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-foreground/50">
                     <span>{log.sets} × {log.reps}</span>
                     <span>{new Date(log.date).toLocaleDateString()}</span>
                   </div>

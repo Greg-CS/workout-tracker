@@ -179,7 +179,7 @@ export function Leaderboard({ entries, currentUserId }: LeaderboardProps) {
                 >
                   <button
                     onClick={() => toggleExpand(entry.userId)}
-                    className="flex w-full items-center justify-between px-4 py-3 text-left"
+                    className="flex w-full flex-col gap-2 px-4 py-3 text-left sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="flex items-center gap-3">
                       <ChevronDown
@@ -195,17 +195,17 @@ export function Leaderboard({ entries, currentUserId }: LeaderboardProps) {
                           {entry.userName}
                           {isYou && <Badge variant="secondary" className="ml-2 text-[10px]">You</Badge>}
                         </span>
-                        <div className="flex items-center gap-2 text-xs text-foreground/40">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-foreground/40">
                           <Badge variant="outline" className="text-[10px]">
                             {templateLabels[entry.templateKey] ?? entry.templateKey}
                           </Badge>
                           <span>{entry.totalLogs} logs</span>
-                          <span>· {entry.avgRepsPerWorkout} avg/workout</span>
-                          <span>· {entry.exercises.length} exercises</span>
+                          <span className="hidden sm:inline">· {entry.avgRepsPerWorkout} avg/workout</span>
+                          <span className="hidden sm:inline">· {entry.exercises.length} exercises</span>
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left sm:text-right">
                       <span className="text-lg font-bold text-primary">{displayValue}</span>
                       <span className="ml-1 text-xs text-foreground/50">{displayLabel}</span>
                     </div>
@@ -217,10 +217,10 @@ export function Leaderboard({ entries, currentUserId }: LeaderboardProps) {
                         {entry.exercises.map((ex) => (
                           <div
                             key={ex.name}
-                            className="flex items-center justify-between rounded-md bg-secondary/5 px-3 py-2 text-xs dark:bg-foreground/5"
+                            className="flex flex-col gap-1.5 rounded-md bg-secondary/5 px-3 py-2 text-xs dark:bg-foreground/5 sm:flex-row sm:items-center sm:justify-between"
                           >
                             <span className="font-medium text-foreground/80">{ex.name}</span>
-                            <div className="flex items-center gap-4 text-foreground/50">
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-foreground/50">
                               <span><span className="font-semibold text-foreground/70">{ex.sessions}</span> sessions</span>
                               <span><span className="font-semibold text-foreground/70">{ex.totalSets}</span> sets</span>
                               <span><span className="font-semibold text-foreground/70">{ex.totalReps}</span> reps</span>

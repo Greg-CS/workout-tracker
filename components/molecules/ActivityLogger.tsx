@@ -45,10 +45,10 @@ export function ActivityLogger({ onLog, loggedActivities = [] }: ActivityLoggerP
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+        <CardTitle className="flex items-center justify-between gap-1">
           <span>External Activities</span>
           {!showForm && (
-            <Button size="sm" variant="outline" onClick={() => setShowForm(true)}>
+            <Button size="sm" variant="outline" className="p-6" onClick={() => setShowForm(true)}>
               + Log Activity
             </Button>
           )}
