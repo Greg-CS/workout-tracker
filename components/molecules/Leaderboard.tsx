@@ -17,6 +17,7 @@ import {
 
 interface ExerciseBreakdown {
   name: string;
+  category: string;
   totalReps: number;
   totalSets: number;
   bestSet: number;
@@ -51,24 +52,56 @@ const templateLabels: Record<string, string> = {
   unknown: "Other",
 };
 
-type SortKey = "avgRepsPerWorkout" | "totalLogs" | "bestSet";
+function formatTemplateKey(key: string): string {
+  if (templateLabels[key]) return templateLabels[key];
+  const parts = key.split("+");
+  if (parts.length > 1) {
+    return parts.map((p) => templateLabels[p] ?? p).join(" + ");
+  }
+  return key;
+}
+
+const categoryLabels: Record<string, string> = {
+  mobility: "Mobility",
+  strength: "Strength",
+  skill: "Skill",
+  cardio: "Cardio",
+  flow: "Flow",
+  warmup: "Warm-up",
+  cooldown: "Cool-down",
+  power: "Power",
+  balance: "Balance",
+  flexibility: "Flexibility",
+};
+
+type SortKey = "avgPerSession" | "totalSessions" | "bestSet";
 
 const sortOptions: { key: SortKey; label: string; icon: typeof Trophy }[] = [
-  { key: "avgRepsPerWorkout", label: "Avg Reps / Workout", icon: Repeat },
-  { key: "totalLogs", label: "Workouts Logged", icon: Dumbbell },
+  { key: "avgPerSession", label: "Avg Reps / Session", icon: Repeat },
+  { key: "totalSessions", label: "Total Sessions", icon: Dumbbell },
   { key: "bestSet", label: "Best Set", icon: Trophy },
 ];
 
 export function Leaderboard({ entries, currentUserId }: LeaderboardProps) {
   const [category, setCategory] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<SortKey>("avgRepsPerWorkout");
+  const [sortBy, setSortBy] = useState<SortKey>("avgPerSession");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  const categories = ["all", ...Array.from(new Set(entries.map((e) => e.templateKey)))];
+  const categories = ["all", ...Array.from(new Set(entries.flatMap((e) => e.exercises.map((ex) => ex.category))))];
+
+  const computeCategoryStats = (entry: LeaderboardEntry, cat: string) => {
+    const exs = cat === "all" ? entry.exercises : entry.exercises.filter((ex) => ex.category === cat);
+    const totalReps = exs.reduce((sum, ex) => sum + ex.totalReps, 0);
+    const totalSessions = exs.reduce((sum, ex) => sum + ex.sessions, 0);
+    const bestSet = exs.reduce((max, ex) => Math.max(max, ex.bestSet), 0);
+    const avgPerSession = totalSessions > 0 ? Math.round(totalReps / totalSessions) : 0;
+    return { totalReps, totalSessions, bestSet, avgPerSession, exercises: exs };
+  };
 
   const filtered = entries
-    .filter((e) => category === "all" || e.templateKey === category)
-    .sort((a, b) => b[sortBy] - a[sortBy]);
+    .map((e) => ({ entry: e, stats: computeCategoryStats(e, category) }))
+    .filter(({ stats }) => stats.totalSessions > 0)
+    .sort((a, b) => b.stats[sortBy] - a.stats[sortBy]);
 
   const activeSort = sortOptions.find((s) => s.key === sortBy)!;
 
@@ -99,7 +132,7 @@ export function Leaderboard({ entries, currentUserId }: LeaderboardProps) {
               render={
                 <Button variant="outline" size="sm" className="gap-2">
                   <Calendar className="h-4 w-4" />
-                  {category === "all" ? "All Categories" : templateLabels[category] ?? category}
+                  {category === "all" ? "All Categories" : categoryLabels[category] ?? category}
                 </Button>
               }
             />
@@ -113,7 +146,7 @@ export function Leaderboard({ entries, currentUserId }: LeaderboardProps) {
                     onClick={() => setCategory(cat)}
                     className={category === cat ? "bg-accent" : ""}
                   >
-                    {cat === "all" ? "All Categories" : templateLabels[cat] ?? cat}
+                    {cat === "all" ? "All Categories" : categoryLabels[cat] ?? cat}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuGroup>
@@ -156,16 +189,16 @@ export function Leaderboard({ entries, currentUserId }: LeaderboardProps) {
           </p>
         ) : (
           <div className="space-y-2">
-            {filtered.map((entry, idx) => {
+            {filtered.map(({ entry, stats }, idx) => {
               const isYou = entry.userId === currentUserId;
               const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : null;
               const displayValue =
-                sortBy === "avgRepsPerWorkout" ? entry.avgRepsPerWorkout
-                : sortBy === "totalLogs" ? entry.totalLogs
-                : entry.bestSet;
+                sortBy === "avgPerSession" ? stats.avgPerSession
+                : sortBy === "totalSessions" ? stats.totalSessions
+                : stats.bestSet;
               const displayLabel =
-                sortBy === "avgRepsPerWorkout" ? "avg/workout"
-                : sortBy === "totalLogs" ? "workouts"
+                sortBy === "avgPerSession" ? "avg/session"
+                : sortBy === "totalSessions" ? "sessions"
                 : "reps";
               const isExpanded = expanded.has(entry.userId);
               return (
@@ -197,11 +230,11 @@ export function Leaderboard({ entries, currentUserId }: LeaderboardProps) {
                         </span>
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-foreground/40">
                           <Badge variant="outline" className="text-[10px]">
-                            {templateLabels[entry.templateKey] ?? entry.templateKey}
+                            {formatTemplateKey(entry.templateKey)}
                           </Badge>
-                          <span>{entry.totalLogs} logs</span>
-                          <span className="hidden sm:inline">· {entry.avgRepsPerWorkout} avg/workout</span>
-                          <span className="hidden sm:inline">· {entry.exercises.length} exercises</span>
+                          <span>{stats.totalSessions} sessions</span>
+                          <span className="hidden sm:inline">· {stats.avgPerSession} avg/session</span>
+                          <span className="hidden sm:inline">· {stats.exercises.length} exercises</span>
                         </div>
                       </div>
                     </div>
@@ -210,11 +243,11 @@ export function Leaderboard({ entries, currentUserId }: LeaderboardProps) {
                       <span className="ml-1 text-xs text-foreground/50">{displayLabel}</span>
                     </div>
                   </button>
-                  {isExpanded && entry.exercises.length > 0 && (
+                  {isExpanded && stats.exercises.length > 0 && (
                     <div className="border-t border-secondary/10 px-4 py-3 dark:border-foreground/5">
                       <div className="mb-2 text-xs font-semibold text-foreground/50">Exercise Breakdown</div>
                       <div className="space-y-1.5">
-                        {entry.exercises.map((ex) => (
+                        {stats.exercises.map((ex) => (
                           <div
                             key={ex.name}
                             className="flex flex-col gap-1.5 rounded-md bg-secondary/5 px-3 py-2 text-xs dark:bg-foreground/5 sm:flex-row sm:items-center sm:justify-between"

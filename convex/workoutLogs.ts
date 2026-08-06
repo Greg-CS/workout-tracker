@@ -226,7 +226,18 @@ export const getLeaderboard = query({
       cutoff = firstOfMonth.getTime();
     }
 
-    const users = await ctx.db.query("users").collect();
+    const allUsers = await ctx.db.query("users").collect();
+
+    const byClerkId = new Map<string, typeof allUsers>();
+    for (const u of allUsers) {
+      const existing = byClerkId.get(u.clerkId);
+      if (!existing) {
+        byClerkId.set(u.clerkId, [u]);
+      } else {
+        existing.push(u);
+      }
+    }
+
     const stats: {
       userId: string;
       userName: string;
@@ -236,14 +247,19 @@ export const getLeaderboard = query({
       bestSet: number;
       avgRepsPerWorkout: number;
       lastLogDate: number;
-      exercises: { name: string; totalReps: number; totalSets: number; bestSet: number; sessions: number }[];
+      exercises: { name: string; category: string; totalReps: number; totalSets: number; bestSet: number; sessions: number }[];
     }[] = [];
 
-    for (const u of users) {
-      let logs = await ctx.db
-        .query("workoutLogs")
-        .withIndex("by_user", (q) => q.eq("userId", u._id))
-        .collect();
+    for (const [, userRecords] of byClerkId) {
+      const primary = userRecords[0];
+      let logs = [];
+      for (const u of userRecords) {
+        const userLogs = await ctx.db
+          .query("workoutLogs")
+          .withIndex("by_user", (q) => q.eq("userId", u._id))
+          .collect();
+        logs.push(...userLogs);
+      }
 
       if (period !== "all") {
         logs = logs.filter((l) => l.date >= cutoff);
@@ -255,7 +271,7 @@ export const getLeaderboard = query({
       let bestSet = 0;
       let lastLogDate = 0;
       const workoutDays = new Set<string>();
-      const exerciseMap: Record<string, { totalReps: number; totalSets: number; bestSet: number; sessions: number }> = {};
+      const exerciseMap: Record<string, { category: string; totalReps: number; totalSets: number; bestSet: number; sessions: number }> = {};
 
       for (const log of logs) {
         totalReps += log.totalReps;
@@ -269,7 +285,7 @@ export const getLeaderboard = query({
         workoutDays.add(new Date(log.date).toDateString());
 
         if (!exerciseMap[log.exerciseName]) {
-          exerciseMap[log.exerciseName] = { totalReps: 0, totalSets: 0, bestSet: 0, sessions: 0 };
+          exerciseMap[log.exerciseName] = { category: log.category, totalReps: 0, totalSets: 0, bestSet: 0, sessions: 0 };
         }
         exerciseMap[log.exerciseName].totalReps += log.totalReps;
         exerciseMap[log.exerciseName].totalSets += log.sets;
@@ -280,14 +296,19 @@ export const getLeaderboard = query({
       const numWorkouts = workoutDays.size;
       const avgRepsPerWorkout = numWorkouts > 0 ? Math.round(totalReps / numWorkouts) : 0;
 
+      const templateKeys = Array.from(new Set(logs.map((l) => l.templateKey))).filter((k) => k);
+      const displayTemplateKey = templateKeys.length > 1
+        ? templateKeys.slice().sort().join("+")
+        : templateKeys[0] ?? primary.selectedTemplate ?? "unknown";
+
       const exercises = Object.entries(exerciseMap)
         .map(([name, data]) => ({ name, ...data }))
         .sort((a, b) => b.totalReps - a.totalReps);
 
       stats.push({
-        userId: u._id,
-        userName: u.name,
-        templateKey: u.selectedTemplate ?? "unknown",
+        userId: primary._id,
+        userName: primary.name,
+        templateKey: displayTemplateKey,
         totalLogs: logs.length,
         totalReps,
         bestSet,
