@@ -45,10 +45,16 @@ export default function DashboardPage() {
     );
   }
 
-  const currentTemplate = templates.find((t) => t.key === userData?.selectedTemplate);
+  const currentTemplateKey = userData?.selectedTemplate ?? "";
+  const isCombined = currentTemplateKey.includes("+");
+  const currentTemplate = templates.find((t) => t.key === currentTemplateKey);
+  const regimenKeys = regimen?.templateKeys ?? (currentTemplateKey ? [currentTemplateKey] : []);
+  const regimenTemplates = regimenKeys.map((k) => templates.find((t) => t.key === k)).filter((t): t is (typeof templates)[number] => !!t);
+  const displayName = regimenTemplates.length > 0 ? regimenTemplates.map((t) => t.name).join(" + ") : (currentTemplate?.name ?? "None selected");
+  const totalDays = regimen?.days.length ?? currentTemplate?.days.length ?? 0;
   const today = new Date().getDay();
   const todayIndex = today === 0 ? 6 : today - 1;
-  const todayWorkout = currentTemplate?.days[todayIndex];
+  const todayWorkout = regimen?.days[todayIndex] ?? currentTemplate?.days[todayIndex];
 
   return (
     <div className="mx-auto max-w-6xl p-6">
@@ -69,12 +75,12 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {currentTemplate?.name ?? "None selected"}
+              {displayName}
             </div>
             <p className="mt-1 text-xs text-foreground/50">
-              {currentTemplate ? `${currentTemplate.days.length} day plan` : "Choose a template to start"}
+              {totalDays > 0 ? `${totalDays} day plan` : "Choose a template to start"}
             </p>
-            {!currentTemplate && (
+            {!currentTemplate && !isCombined && (
               <Link href="/templates" className="mt-3 inline-block">
                 <Button size="sm">Select Template <ArrowRight className="h-3 w-3" /></Button>
               </Link>
@@ -159,11 +165,11 @@ export default function DashboardPage() {
         </Card>
       )}
 
-      {currentTemplate && todayWorkout && (
+      {todayWorkout && (
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>Today&apos;s Exercises — {todayWorkout.title}</CardTitle>
-            <CardDescription>Day {todayWorkout.day} of your {currentTemplate.name} regimen</CardDescription>
+            <CardDescription>Day {todayWorkout.day} of your {displayName} regimen</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">

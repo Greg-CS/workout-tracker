@@ -111,6 +111,8 @@ export const equipmentSubstitutions: Record<string, EquipmentSubstitution> = {
   },
 };
 
+const normalize = (s: string) => s.toLowerCase().replace(/-/g, " ").trim();
+
 export function checkEquipmentAvailability(
   exerciseEquipment: string,
   userEquipment: string[],
@@ -119,16 +121,18 @@ export function checkEquipmentAvailability(
     return { available: true };
   }
 
-  const required = exerciseEquipment.toLowerCase().trim();
+  const required = normalize(exerciseEquipment);
 
   for (const userItem of userEquipment) {
-    if (required.includes(userItem) || userItem.includes(required)) {
+    const item = normalize(userItem);
+    if (required.includes(item) || item.includes(required)) {
       return { available: true };
     }
   }
 
   for (const [key, sub] of Object.entries(equipmentSubstitutions)) {
-    if (required.includes(key) || key.includes(required)) {
+    const normKey = normalize(key);
+    if (required.includes(normKey) || normKey.includes(required)) {
       return { available: false, substitution: sub };
     }
   }

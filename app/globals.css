@@ -156,3 +156,15 @@ body {
     @apply font-sans;
   }
 }
+
+.rdp-has-logs::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background-color: var(--primary);
+}

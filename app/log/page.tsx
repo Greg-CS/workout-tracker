@@ -140,6 +140,7 @@ export default function LogWorkoutPage() {
             intakeResult.prescription,
           ),
         ).map((ex) => applyEquipmentProgression(ex, intakeResult.equipment)),
+        intakeResult.equipment,
       )
     : [];
 

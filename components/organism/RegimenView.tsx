@@ -3,7 +3,7 @@
 import { ExerciseCard } from "@/components/molecules/ExerciseCard";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/atoms/Card";
 import { Badge } from "@/components/atoms/Badge";
-import { getEquipmentProgression } from "@/lib/equipmentModel";
+import { getEquipmentProgression, checkEquipmentAvailability } from "@/lib/equipmentModel";
 import { enhanceDayWithWarmup } from "@/lib/warmupLibrary";
 
 interface GenericExercise {
@@ -48,7 +48,10 @@ export function RegimenView({ days, userEquipment = ["bodyweight"] }: RegimenVie
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {day.exercises.map((ex, i) => {
+            {day.exercises.filter((ex) => {
+              const { available } = checkEquipmentAvailability(ex.load, userEquipment);
+              return available;
+            }).map((ex, i) => {
               const prog = getEquipmentProgression(ex.name, userEquipment);
               return (
                 <ExerciseCard

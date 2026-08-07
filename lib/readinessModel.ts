@@ -1,6 +1,6 @@
 import type { BodyRegion, Intensity } from "./activityModel";
 import { activityFatigue } from "./activityModel";
-import { getEquipmentProgression, type EquipmentProgression } from "./equipmentModel";
+import { getEquipmentProgression, checkEquipmentAvailability, type EquipmentProgression } from "./equipmentModel";
 
 export type Prescription = "full" | "reduced" | "technique" | "recovery";
 
@@ -164,8 +164,13 @@ export function applyEquipmentProgression(
   };
 }
 
-export function filterAdaptedExercises(exercises: AdaptedExercise[]): AdaptedExercise[] {
-  return exercises.filter((e) => e.sets > 0);
+export function filterAdaptedExercises(exercises: AdaptedExercise[], userEquipment?: string[]): AdaptedExercise[] {
+  return exercises.filter((e) => {
+    if (e.sets <= 0) return false;
+    if (!userEquipment || userEquipment.length === 0) return true;
+    const { available } = checkEquipmentAvailability(e.load ?? "", userEquipment);
+    return available;
+  });
 }
 
 export const prescriptionLabels: Record<Prescription, string> = {

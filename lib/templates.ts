@@ -489,14 +489,30 @@ export function combineTemplates(keys: string[]): { key: string; name: string; d
   const selected = keys.map((k) => getTemplate(k)).filter((t): t is Template => !!t);
   if (selected.length === 0) return null;
 
-  let dayCounter = 1;
-  const days: RegimenDay[] = selected.flatMap((t) =>
-    t.days.map((d) => ({
-      ...d,
-      day: dayCounter++,
-      sourceTemplate: t.name,
-    })),
-  );
+  const maxDays = Math.min(7, Math.max(...selected.map((t) => t.days.length)));
+  const days: RegimenDay[] = [];
+
+  for (let i = 0; i < maxDays; i++) {
+    const dayParts = selected
+      .map((t) => ({ template: t, day: t.days[i] }))
+      .filter((p) => p.day !== undefined);
+
+    if (dayParts.length === 0) continue;
+
+    const exercises = dayParts.flatMap((p) =>
+      p.day.exercises.map((ex) => ({ ...ex })),
+    );
+
+    const titleParts = dayParts.map((p) => `${p.template.name}: ${p.day.title}`);
+    const sources = dayParts.map((p) => p.template.name);
+
+    days.push({
+      day: i + 1,
+      title: titleParts.join(" + "),
+      sourceTemplate: sources.join(" + "),
+      exercises,
+    });
+  }
 
   return {
     key: selected.map((t) => t.key).join("+"),
