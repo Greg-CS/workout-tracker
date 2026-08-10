@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { error } = await resend.emails.send({
-      from: "Workout Tracker <noreply@resend.dev>",
+      from: "Gym snooze <noreply@resend.dev>",
       to: email,
       subject: `Your ${templateName} regimen is ready!`,
       html: `
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
           <p>You've successfully selected the <strong>${templateName}</strong> training template. Here's a summary of your weekly plan:</p>
           <pre style="background: #f4f4f5; padding: 16px; border-radius: 8px; white-space: pre-wrap; font-size: 14px;">${regimenSummary}</pre>
           <p>Head over to your <a href="${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/dashboard">dashboard</a> to start training.</p>
-          <p>Stay consistent!<br />The Workout Tracker Team</p>
+          <p>Stay consistent!<br />The Gym snooze Team</p>
         </div>
       `,
     });

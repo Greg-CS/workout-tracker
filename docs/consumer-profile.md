@@ -233,7 +233,7 @@ Daniel becomes discouraged when the first workout already feels beyond his abili
 
 ## Fitness applications built around weightlifting
 
-Traditional workout trackers often assume the user is performing exercises with:
+Traditional Gym snoozes often assume the user is performing exercises with:
 
 * Barbells
 * Dumbbells

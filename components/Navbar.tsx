@@ -25,7 +25,7 @@ export function Navbar() {
         <div className="flex items-center gap-6">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
             <Dumbbell className="h-5 w-5 text-primary" />
-            <span className="hidden sm:inline">Workout Tracker</span>
+            <span className="hidden sm:inline">Gym snooze</span>
           </Link>
           <div className="hidden items-center gap-1 md:flex">
             {navItems.map((item) => {

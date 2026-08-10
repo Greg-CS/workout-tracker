@@ -368,7 +368,7 @@ As the platform develops:
 
 ## Why it will sell
 
-Most workout trackers were built around conventional resistance training.
+Most Gym snoozes were built around conventional resistance training.
 
 They work well for recording:
 

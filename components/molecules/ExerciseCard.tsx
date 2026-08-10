@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { Badge } from "@/components/atoms/Badge";
 import { ExerciseImage } from "@/components/molecules/ExerciseImage";
+import { MuscleVisualizer } from "@/components/molecules/MuscleVisualizer";
 import { exerciseInfo } from "@/lib/exerciseInfo";
 import { checkEquipmentAvailability } from "@/lib/equipmentModel";
-import { ChevronDown, Play, AlertCircle, ArrowUp, Clock, Trophy } from "lucide-react";
+import { ChevronDown, Play, AlertCircle, ArrowUp, Clock, Trophy, Dumbbell } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ExerciseCardProps {
@@ -44,6 +45,7 @@ export function ExerciseCard({
   const info = exerciseInfo[name];
   const [expanded, setExpanded] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [showMuscles, setShowMuscles] = useState(false);
 
   const equipCheck = checkEquipmentAvailability(
     equipment ?? load,
@@ -124,57 +126,68 @@ export function ExerciseCard({
         </div>
       </div>
 
-      {(info?.long || info?.youtubeId) && (
-        <div className="border-t border-secondary/15 dark:border-foreground/10">
-          <div className="flex items-center divide-x divide-secondary/15 dark:divide-foreground/10">
-            {info?.long && (
-              <button
-                onClick={() => setExpanded(!expanded)}
-                className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-foreground/60 transition-colors hover:bg-secondary/10"
-              >
-                <ChevronDown
-                  className={cn(
-                    "h-3.5 w-3.5 transition-transform",
-                    expanded && "rotate-180",
-                  )}
-                />
-                {expanded ? "Hide Details" : "Show Details"}
-              </button>
-            )}
-            {info?.youtubeId && (
-              <button
-                onClick={() => setShowVideo(!showVideo)}
-                className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-foreground/60 transition-colors hover:bg-secondary/10"
-              >
-                <Play className="h-3.5 w-3.5" />
-                {showVideo ? "Hide Video" : "Watch Demo"}
-              </button>
-            )}
-          </div>
-
-          {expanded && info?.long && (
-            <div className="px-4 pb-4 pt-2">
-              <p className="text-sm leading-relaxed text-foreground/60">
-                {info.long}
-              </p>
-            </div>
+      <div className="border-t border-secondary/15 dark:border-foreground/10">
+        <div className="flex items-center divide-x divide-secondary/15 dark:divide-foreground/10">
+          {info?.long && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-foreground/60 transition-colors hover:bg-secondary/10"
+            >
+              <ChevronDown
+                className={cn(
+                  "h-3.5 w-3.5 transition-transform",
+                  expanded && "rotate-180",
+                )}
+              />
+              {expanded ? "Hide Details" : "Show Details"}
+            </button>
           )}
-
-          {showVideo && info?.youtubeId && (
-            <div className="px-4 pb-4 pt-2">
-              <div className="aspect-video w-full overflow-hidden rounded-lg">
-                <iframe
-                  src={`https://www.youtube.com/embed/${info.youtubeId}`}
-                  title={`${name} demo`}
-                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="h-full w-full"
-                />
-              </div>
-            </div>
+          <button
+            onClick={() => setShowMuscles(!showMuscles)}
+            className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-foreground/60 transition-colors hover:bg-secondary/10"
+          >
+            <Dumbbell className="h-3.5 w-3.5" />
+            {showMuscles ? "Hide Muscles" : "Muscles"}
+          </button>
+          {info?.youtubeId && (
+            <button
+              onClick={() => setShowVideo(!showVideo)}
+              className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-foreground/60 transition-colors hover:bg-secondary/10"
+            >
+              <Play className="h-3.5 w-3.5" />
+              {showVideo ? "Hide Video" : "Watch Demo"}
+            </button>
           )}
         </div>
-      )}
+
+        {expanded && info?.long && (
+          <div className="px-4 pb-4 pt-2">
+            <p className="text-sm leading-relaxed text-foreground/60">
+              {info.long}
+            </p>
+          </div>
+        )}
+
+        {showMuscles && (
+          <div className="px-4 pb-4 pt-2">
+            <MuscleVisualizer exerciseName={name} />
+          </div>
+        )}
+
+        {showVideo && info?.youtubeId && (
+          <div className="px-4 pb-4 pt-2">
+            <div className="aspect-video w-full overflow-hidden rounded-lg">
+              <iframe
+                src={`https://www.youtube.com/embed/${info.youtubeId}`}
+                title={`${name} demo`}
+                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="h-full w-full"
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

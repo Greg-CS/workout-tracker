@@ -13,7 +13,7 @@ export const sendReminderEmail = action({
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     const { data, error } = await resend.emails.send({
-      from: "Workout Tracker <noreply@yourdomain.com>",
+      from: "Gym snooze <noreply@yourdomain.com>",
       to: args.to,
       subject: `Welcome back, ${args.name}! Here's your workout for today`,
       html: `
@@ -25,7 +25,7 @@ export const sendReminderEmail = action({
             <p style="margin: 0; color: #555;">Today's focus: ${args.todayWorkout}</p>
           </div>
           <a href="https://your-app-domain.com/log" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin-top: 16px;">Start Today's Workout</a>
-          <p style="color: #999; font-size: 12px; margin-top: 32px;">You're receiving this because you signed in to Workout Tracker.</p>
+          <p style="color: #999; font-size: 12px; margin-top: 32px;">You're receiving this because you signed in to Gym snooze.</p>
         </div>
       `,
     });
@@ -50,7 +50,7 @@ export const sendRegimenConfirmationEmail = action({
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     const { data, error } = await resend.emails.send({
-      from: "Workout Tracker <noreply@yourdomain.com>",
+      from: "Gym snooze <noreply@yourdomain.com>",
       to: args.to,
       subject: `Your ${args.templateName} regimen is ready!`,
       html: `
@@ -61,7 +61,7 @@ export const sendRegimenConfirmationEmail = action({
             ${args.regimenSummary}
           </div>
           <a href="https://your-app-domain.com/regimen" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin-top: 16px;">View Full Regimen</a>
-          <p style="color: #999; font-size: 12px; margin-top: 32px;">You're receiving this because you selected a workout template on Workout Tracker.</p>
+          <p style="color: #999; font-size: 12px; margin-top: 32px;">You're receiving this because you selected a workout template on Gym snooze.</p>
         </div>
       `,
     });
