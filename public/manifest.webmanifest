@@ -9,13 +9,13 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/logo.ico",
+      "src": "/applogo.svg",
       "sizes": "any",
       "type": "image/x-icon",
       "purpose": "any"
     },
     {
-      "src": "/logo.ico",
+      "src": "/applogo.svg",
       "sizes": "any",
       "type": "image/x-icon",
       "purpose": "maskable"
