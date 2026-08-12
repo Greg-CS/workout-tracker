@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Dumbbell, LayoutDashboard, ClipboardList, History, Trophy, User, Settings } from "lucide-react";
+import { Dumbbell, LayoutDashboard, ClipboardList, History, Trophy, User, Settings, Users, Lightbulb } from "lucide-react";
 import { UserButton, useAuth } from "@clerk/nextjs";
 import { ThemeToggle } from "./ThemeToggle";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,7 @@ const navItems = [
   { href: "/templates", label: "Templates", icon: Dumbbell },
   { href: "/log", label: "Log Workout", icon: ClipboardList },
   { href: "/history", label: "History", icon: History },
+  { href: "/users", label: "Users", icon: Users },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
 ];
 
@@ -89,6 +90,10 @@ export function Navbar() {
                   <DropdownMenuItem onClick={() => (window.location.href = "/settings")}>
                     <Settings className="h-4 w-4" />
                     Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => (window.location.href = "/suggestions")}>
+                    <Lightbulb className="h-4 w-4" />
+                    Suggestions
                   </DropdownMenuItem>
                   {process.env.NODE_ENV === "development" && (
                     <DropdownMenuItem>

@@ -27,8 +27,8 @@ export const metadata: Metadata = {
     title: "Gym snooze",
   },
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: "/logo.ico",
+    apple: "/logo.ico",
   },
 };
 

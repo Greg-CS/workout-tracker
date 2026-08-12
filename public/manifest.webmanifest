@@ -9,15 +9,15 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/icon.svg",
+      "src": "/logo.ico",
       "sizes": "any",
-      "type": "image/svg+xml",
+      "type": "image/x-icon",
       "purpose": "any"
     },
     {
-      "src": "/icon.svg",
+      "src": "/logo.ico",
       "sizes": "any",
-      "type": "image/svg+xml",
+      "type": "image/x-icon",
       "purpose": "maskable"
     }
   ]

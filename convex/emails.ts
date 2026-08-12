@@ -74,3 +74,38 @@ export const sendRegimenConfirmationEmail = action({
     return { success: true, data };
   },
 });
+
+export const sendSuggestionEmail = action({
+  args: {
+    fromName: v.string(),
+    fromEmail: v.string(),
+    message: v.string(),
+  },
+  handler: async (_ctx, args) => {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    const { data, error } = await resend.emails.send({
+      from: "Gym snooze <noreply@yourdomain.com>",
+      to: "gregor.rodriguez@digital-sunsets.com",
+      replyTo: args.fromEmail,
+      subject: `Gym snooze suggestion from ${args.fromName}`,
+      text: args.message,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
+          <h1 style="color: #333;">New Gym snooze suggestion</h1>
+          <p style="color: #666; font-size: 16px;">From: ${args.fromName} (${args.fromEmail})</p>
+          <div style="background: #f5f5f5; border-radius: 8px; padding: 20px; margin: 16px 0; white-space: pre-line; color: #555;">
+            ${args.message.replace(/\n/g, "<br />")}
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Resend error:", error);
+      return { success: false, error };
+    }
+
+    return { success: true, data };
+  },
+});
