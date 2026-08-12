@@ -78,12 +78,11 @@ export const exerciseMuscleMap: Record<string, MuscleActivation> = {
   "DB Shoulder Press": m(["front-shoulders", "side-shoulders", "triceps"], ["upper-back"]),
   "Swimmer Shoulder Press": m(["front-shoulders", "side-shoulders", "triceps"], ["upper-back"]),
   "Lateral Raises": m(["side-shoulders"], ["front-shoulders", "triceps"]),
-  "Lateral Raises (if dumbbells)": m(["side-shoulders"], ["front-shoulders"]),
+  "DB Lateral Raises": m(["side-shoulders"], ["front-shoulders"]),
   "Shoulder Dislocates (band)": m(["rear-shoulders", "upper-back"], ["chest"]),
 
   // Arm exercises
-  "Hammer Curls": m(["biceps", "forearms"], []),
-  "Hammer Curls (if dumbbells)": m(["biceps", "forearms"], []),
+  "DB Hammer Curls": m(["biceps", "forearms"], []),
   "DB Floor Press": m(["triceps", "chest", "front-shoulders"], ["biceps"]),
 
   // Leg exercises
@@ -100,7 +99,7 @@ export const exerciseMuscleMap: Record<string, MuscleActivation> = {
   "Wall Sit": m(["quads"], ["glutes", "calves"]),
   "Calf Raises": m(["calves"], ["quads"]),
   "Romanian Deadlift": m(["hamstrings", "glutes", "lower-back"], ["calves", "forearms"]),
-  "Romanian Deadlift (if dumbbells)": m(["hamstrings", "glutes", "lower-back"], ["calves", "forearms"]),
+  "DB Romanian Deadlift": m(["hamstrings", "glutes", "lower-back"], ["calves", "forearms"]),
   "Single-Leg Deadlift": m(["hamstrings", "glutes", "lower-back"], ["calves", "abs"]),
   "Glute Bridge": m(["glutes", "hamstrings"], ["lower-back", "abs"]),
   "Shoulder Bridge": m(["glutes", "hamstrings", "lower-back"], ["abs"]),
@@ -186,11 +185,6 @@ export const exerciseMuscleMap: Record<string, MuscleActivation> = {
 export function getMuscleActivation(exerciseName: string): MuscleActivation | null {
   const direct = exerciseMuscleMap[exerciseName];
   if (direct) return direct;
-
-  // Try without "(if dumbbells)" suffix
-  const cleaned = exerciseName.replace(/\s*\(if dumbbells\)\s*/i, "").trim();
-  const cleanedMatch = exerciseMuscleMap[cleaned];
-  if (cleanedMatch) return cleanedMatch;
 
   // Try without "(band)" suffix
   const noBand = exerciseName.replace(/\s*\(band\)\s*/i, "").trim();

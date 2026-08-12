@@ -70,4 +70,12 @@ export default defineSchema({
     prescription: v.string(),
     score: v.number(),
   }).index("by_user", ["userId"]).index("by_user_date", ["userId", "date"]),
+
+  follows: defineTable({
+    followerId: v.id("users"),
+    followingId: v.id("users"),
+  })
+    .index("by_follower", ["followerId"])
+    .index("by_following", ["followingId"])
+    .index("by_pair", ["followerId", "followingId"]),
 });

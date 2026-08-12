@@ -89,3 +89,105 @@ export const updateTemplate = mutation({
     return user._id;
   },
 });
+
+export const updateName = mutation({
+  args: {
+    clerkId: v.string(),
+    name: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .first();
+
+    if (!user) return null;
+
+    await ctx.db.patch(user._id, { name: args.name });
+    return user._id;
+  },
+});
+
+export const listUsers = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("users").collect();
+  },
+});
+
+export const getUserPublicProfile = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.userId);
+  },
+});
+
+export const isFollowing = query({
+  args: {
+    followerId: v.id("users"),
+    followingId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("follows")
+      .withIndex("by_pair", (q) =>
+        q.eq("followerId", args.followerId).eq("followingId", args.followingId),
+      )
+      .first();
+    return !!existing;
+  },
+});
+
+export const getFollowing = query({
+  args: { followerId: v.id("users") },
+  handler: async (ctx, args) => {
+    const follows = await ctx.db
+      .query("follows")
+      .withIndex("by_follower", (q) => q.eq("followerId", args.followerId))
+      .collect();
+    return follows.map((f) => f.followingId);
+  },
+});
+
+export const followUser = mutation({
+  args: {
+    followerId: v.id("users"),
+    followingId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    if (args.followerId === args.followingId) return null;
+
+    const existing = await ctx.db
+      .query("follows")
+      .withIndex("by_pair", (q) =>
+        q.eq("followerId", args.followerId).eq("followingId", args.followingId),
+      )
+      .first();
+    if (existing) return existing._id;
+
+    const followId = await ctx.db.insert("follows", {
+      followerId: args.followerId,
+      followingId: args.followingId,
+    });
+    return followId;
+  },
+});
+
+export const unfollowUser = mutation({
+  args: {
+    followerId: v.id("users"),
+    followingId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("follows")
+      .withIndex("by_pair", (q) =>
+        q.eq("followerId", args.followerId).eq("followingId", args.followingId),
+      )
+      .first();
+    if (!existing) return null;
+
+    await ctx.db.delete(existing._id);
+    return existing._id;
+  },
+});

@@ -4,17 +4,17 @@ import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/atoms/Card";
+import { Card, CardContent } from "@/components/atoms/Card";
 import { Button } from "@/components/atoms/Button";
 import { Badge } from "@/components/atoms/Badge";
 import { Input } from "@/components/atoms/Input";
-import { Loader2, Check, ClipboardList, Activity, Trophy } from "lucide-react";
+import { Loader2, Check, ClipboardList, Activity, Download } from "lucide-react";
 import { templates } from "@/lib/templates";
 import { IntakeFlow, type IntakeResult } from "@/components/organism/IntakeFlow";
-import { WorkoutSession } from "@/components/organism/WorkoutSession";
+import { ReadinessGauge } from "@/components/molecules/ReadinessGauge";
+import { ExerciseCard } from "@/components/molecules/ExerciseCard";
 import { adaptExercise, filterAdaptedExercises, applyEquipmentProgression } from "@/lib/readinessModel";
 import { enhanceDayWithWarmup } from "@/lib/warmupLibrary";
-import { ExerciseImage } from "@/components/molecules/ExerciseImage";
 import { ExerciseTimer } from "@/components/molecules/ExerciseTimer";
 import { RestTimer } from "@/components/molecules/RestTimer";
 import Link from "next/link";
@@ -96,6 +96,64 @@ export default function LogWorkoutPage() {
     }
   }
 
+  const handleDownloadPDF = () => {
+    if (!regimen) return;
+    const keys = regimen.templateKeys ?? [regimen.templateKey];
+    const matchedTemplates = keys.map((k) => templates.find((t) => t.key === k)).filter((t): t is (typeof templates)[number] => !!t);
+    if (matchedTemplates.length === 0) return;
+    const displayName = matchedTemplates.map((t) => t.name).join(" + ");
+
+    import("jspdf").then(({ jsPDF }) => {
+      import("jspdf-autotable").then(() => {
+        const doc = new jsPDF();
+
+        doc.setFontSize(20);
+        doc.text(`${displayName} Regimen`, 14, 22);
+
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Athlete: ${user?.fullName ?? "Unknown"}`, 14, 30);
+        doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 36);
+        doc.setTextColor(0);
+
+        let y = 46;
+
+        regimen.days.forEach((day) => {
+          if (y > 250) {
+            doc.addPage();
+            y = 20;
+          }
+
+          doc.setFontSize(14);
+          doc.text(`Day ${day.day}: ${day.title}`, 14, y);
+          y += 6;
+
+          const autoTable = (doc as unknown as { autoTable: (config: unknown) => void }).autoTable;
+          autoTable({
+            startY: y,
+            head: [["Exercise", "Category", "Sets", "Target", "Load", "Rest", "Notes"]],
+            body: day.exercises.map((ex) => [
+              ex.name,
+              ex.category,
+              String(ex.sets),
+              ex.target,
+              ex.load,
+              `${ex.rest}s`,
+              ex.notes,
+            ]),
+            theme: "striped",
+            headStyles: { fillColor: [8, 135, 50] },
+            styles: { fontSize: 8, cellPadding: 2 },
+          });
+
+          y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
+        });
+
+        doc.save(`${matchedTemplates.map((t) => t.key).join("-")}-regimen.pdf`);
+      });
+    });
+  };
+
   const handleIntakeComplete = async (result: IntakeResult) => {
     setIntakeResult(result);
     setIntakeDone(true);
@@ -141,7 +199,7 @@ export default function LogWorkoutPage() {
           ),
         ).map((ex) => applyEquipmentProgression(ex, intakeResult.equipment)),
         intakeResult.equipment,
-      )
+      ).filter((ex, i, arr) => arr.findIndex((e) => e.name === ex.name) === i)
     : [];
 
   const updateSet = (exerciseIndex: number, setIndex: number, value: string) => {
@@ -190,7 +248,7 @@ export default function LogWorkoutPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
+    <div className="mx-auto p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Log Workout</h1>
         <p className="mt-2 text-sm text-foreground/50">
@@ -242,96 +300,75 @@ export default function LogWorkoutPage() {
                 Day {day.day}: {day.title}
               </span>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setIntakeDone(false);
-                setIntakeResult(null);
-                setSetData({});
-                setLoadData({});
-                setRestSetIdx({});
-                setForceRelog(new Set());
-                setLogged(new Set());
-              }}
-            >
-              ← Redo Intake
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button size="sm" onClick={handleDownloadPDF}>
+                <Download className="h-4 w-4" /> PDF
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIntakeDone(false);
+                  setIntakeResult(null);
+                  setSetData({});
+                  setLoadData({});
+                  setRestSetIdx({});
+                  setForceRelog(new Set());
+                  setLogged(new Set());
+                }}
+              >
+                ← Redo Intake
+              </Button>
+            </div>
           </div>
 
-          <WorkoutSession
-            dayTitle={day.title}
-            exercises={day.exercises.map((ex) => ({
-              name: ex.name,
-              category: ex.category,
-              sets: ex.sets,
-              target: ex.target,
-              load: ex.load,
-              rest: ex.rest,
-              notes: ex.notes,
-              equipment: ex.load,
-            }))}
-            prescription={intakeResult.prescription}
+          <ReadinessGauge
             score={intakeResult.score}
+            prescription={intakeResult.prescription}
             reasons={intakeResult.reasons}
-            userEquipment={intakeResult.equipment}
-            prs={prs ?? []}
           />
 
-          <div className="mt-6 space-y-4">
-            <h2 className="text-lg font-semibold">Log Your Sets</h2>
+          <div className="mt-6 space-y-4 grid grid-cols-1 md:grid-cols-3 gap-4">
             {adaptedExercises.map((exercise, exIdx) => {
               const sessionLogged = logged.has(exIdx);
               const weekLogged = !sessionLogged && alreadyLoggedNames.has(exercise.name);
               const isLogged = sessionLogged || weekLogged;
               const inputsDisabled = sessionLogged || (weekLogged && !forceRelog.has(exIdx));
               const sets = setData[exIdx] ?? Array(exercise.sets).fill("");
+              const pr = prs?.find((p) => p.exercise === exercise.name || p.exercise === exercise.originalName);
 
               return (
-                <Card key={exIdx} className={isLogged ? "border-primary/60" : ""}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <ExerciseImage name={exercise.name} size="sm" />
-                        <div>
-                          <CardTitle className="text-base">{exercise.name}</CardTitle>
-                          <CardDescription>
-                            Target: {exercise.target} · Load: {exercise.load} · Rest: {exercise.rest}s
-                          </CardDescription>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary">{exercise.category}</Badge>
-                        {(() => {
-                          const pr = prs?.find((p) => p.exercise === exercise.name || p.exercise === exercise.originalName);
-                          if (pr && pr.bestSet > 0) {
-                            const loadInfo = pr.bestLoad && pr.bestLoad !== "bodyweight" ? ` @ ${pr.bestLoad}` : "";
-                            return (
-                              <Badge variant="outline" className="gap-1 text-primary">
-                                <Trophy className="h-3 w-3" />
-                                Max: {pr.bestSet} reps{loadInfo}
-                              </Badge>
-                            );
-                          }
-                          return null;
-                        })()}
-                        {sessionLogged && (
-                          <Badge variant="success">
-                            <Check className="mr-1 h-3 w-3" /> Logged
-                          </Badge>
-                        )}
-                        {weekLogged && !forceRelog.has(exIdx) && (
-                          <Badge variant="outline" className="gap-1 text-foreground/50">
-                            <Check className="h-3 w-3" /> Logged this week
-                          </Badge>
-                        )}
-                      </div>
+                <ExerciseCard
+                  key={exIdx}
+                  name={exercise.name}
+                  category={exercise.category}
+                  sets={exercise.sets}
+                  target={exercise.target}
+                  load={exercise.load}
+                  rest={exercise.rest}
+                  notes={exercise.notes}
+                  equipment={exercise.load}
+                  cue={exercise.cue}
+                  originalSets={exercise.originalSets}
+                  originalName={exercise.originalName}
+                  durationSec={exercise.durationSec}
+                  userEquipment={intakeResult.equipment}
+                  pr={pr && pr.bestSet > 0 ? pr : undefined}
+                  className={isLogged ? "border-primary/60" : ""}
+                >
+                  <div className="border-t border-secondary/15 px-4 pb-4 pt-3 dark:border-foreground/10">
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                      {sessionLogged && (
+                        <Badge variant="success">
+                          <Check className="mr-1 h-3 w-3" /> Logged
+                        </Badge>
+                      )}
+                      {weekLogged && !forceRelog.has(exIdx) && (
+                        <Badge variant="outline" className="gap-1 text-foreground/50">
+                          <Check className="h-3 w-3" /> Logged this week
+                        </Badge>
+                      )}
                     </div>
-                    {exercise.cue && exercise.cue !== exercise.notes && (
-                      <p className="mt-1 text-xs italic text-accent">{exercise.cue}</p>
-                    )}
-                  </CardHeader>
-                  <CardContent>
                     {exercise.load && exercise.load !== "bodyweight" && !inputsDisabled && (
                       <div className="mb-3 flex items-center gap-2">
                         <span className="text-sm text-foreground/50">Load used:</span>
@@ -407,8 +444,8 @@ export default function LogWorkoutPage() {
                         Log Again
                       </Button>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </ExerciseCard>
               );
             })}
           </div>

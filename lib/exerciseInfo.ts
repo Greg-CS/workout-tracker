@@ -54,7 +54,7 @@ export const exerciseInfo: Record<string, ExerciseInfo> = {
     short: "A horizontal pulling exercise using a low bar or rings, targeting the upper back, rhomboids, and biceps for balanced shoulder development.",
     long: "Set a bar or rings at about waist height. Hang underneath with your body in a straight line, chest up. Pull your chest toward the bar by squeezing your shoulder blades together and bending the elbows. Lower with control. The more horizontal your body, the harder the exercise. Bodyweight rows complement push-ups perfectly by developing the pulling muscles that push-ups neglect.",
   },
-  "Hammer Curls (if dumbbells)": {
+  "DB Hammer Curls": {
     short: "A bicep and forearm exercise using a neutral grip with dumbbells, building arm strength and elbow stability.",
     long: "Stand with a dumbbell in each hand, palms facing each other (neutral grip). Curl the weights up while keeping the elbows pinned to your sides. Squeeze at the top, then lower with control. The neutral grip engages the brachialis and brachioradialis in addition to the biceps, making this excellent for overall arm development and elbow joint stability. No swinging — keep it strict.",
   },
@@ -70,7 +70,7 @@ export const exerciseInfo: Record<string, ExerciseInfo> = {
     short: "A single-leg squat variation with one foot forward and one back, developing leg strength, balance, and hip stability.",
     long: "Step into a staggered stance with one foot forward and one back. Lower straight down by bending both knees to 90 degrees, keeping your torso upright and front knee tracking over the toes. Push through the front heel to stand back up. Keep most of the weight on the front leg. Split squats build single-leg strength and address imbalances between sides. Progress to Bulgarian split squats by elevating the rear foot.",
   },
-  "Romanian Deadlift (if dumbbells)": {
+  "DB Romanian Deadlift": {
     short: "A hip-hinge exercise targeting the hamstrings and glutes, performed with a slight knee bend and a controlled negative.",
     long: "Hold dumbbells in front of your thighs. Hinge at the hips with a slight knee bend, pushing your hips back and lowering the weights along your legs. Keep your back flat and feel a stretch in your hamstrings. Stop when you feel tension, then drive your hips forward to stand. Do not squat — this is a hinge. The RDL builds hamstring and glute strength with less lower-back stress than conventional deadlifts.",
   },
@@ -90,7 +90,7 @@ export const exerciseInfo: Record<string, ExerciseInfo> = {
     short: "A seated straddle forward fold that stretches the adductors and hamstrings while building hip compression for gymnastic skills.",
     long: "Sit on the floor with your legs spread wide in a straddle position. Keep your knees pointing up (not rolling inward). Fold forward from the hips with a straight spine, reaching your hands far forward. The goal is to eventually bring your chest to the floor. This stretch opens the adductors and hamstrings while building the active hip compression needed for gymnastic skills like press handstands and L-sits.",
   },
-  "Lateral Raises (if dumbbells)": {
+  "DB Lateral Raises": {
     short: "A shoulder isolation exercise lifting dumbbells out to the sides, targeting the lateral deltoid for shoulder width.",
     long: "Stand with dumbbells at your sides, palms facing in. Raise the weights out to the sides until your arms are parallel to the floor, keeping a slight bend in the elbows. Lead with the elbows, not the hands. Lower slowly. Do not swing or use momentum — strict form maximizes lateral deltoid activation. This exercise builds shoulder width and complements overhead pressing.",
   },
@@ -233,10 +233,6 @@ export const exerciseInfo: Record<string, ExerciseInfo> = {
   "DB Floor Press": {
     short: "A pressing exercise lying on the floor with dumbbells, limiting range of motion to emphasize triceps lockout strength.",
     long: "Lie on the floor with dumbbells extended overhead. Lower the weights until your triceps touch the floor, then press back up. The floor stops the range of motion, removing the chest stretch and emphasizing the triceps lockout portion of the press. This is excellent for building bench press lockout strength and triceps mass. Do 8-15 reps.",
-  },
-  "Hammer Curls": {
-    short: "A bicep and forearm exercise using a neutral grip with dumbbells, building arm strength and elbow stability.",
-    long: "Stand with dumbbells at your sides, palms facing each other. Curl the weights up keeping the elbows pinned to your sides. Squeeze at the top, then lower with control. The neutral grip engages the brachialis and forearms in addition to the biceps. Hammer curls build overall arm size and elbow joint stability. Do 10-15 strict reps.",
   },
   "Conventional Deadlift": {
     short: "A maximal strength exercise lifting a barbell from the floor, engaging the entire posterior chain, core, and grip.",

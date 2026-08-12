@@ -206,11 +206,7 @@ const progressionMap: Record<string, EquipmentProgression[]> = {
     { equipment: "dumbbells", upgradedName: "DB Lateral Raises", upgradedLoad: "Dumbbells", cue: "Strict form — raise to shoulder height." },
     { equipment: "resistance-band", upgradedName: "Band Lateral Raises", upgradedLoad: "Resistance band", cue: "Step on band — controlled raises." },
   ],
-  "Hammer Curls (if dumbbells)": [
-    { equipment: "dumbbells", upgradedName: "DB Hammer Curls", upgradedLoad: "Dumbbells", cue: "Neutral grip — no swinging." },
-  ],
-  "Romanian Deadlift (if dumbbells)": [
-    { equipment: "dumbbells", upgradedName: "DB Romanian Deadlift", upgradedLoad: "Dumbbells", cue: "Hinge at hips — feel the hamstring stretch." },
+  "DB Romanian Deadlift": [
     { equipment: "barbell", upgradedName: "Barbell Romanian Deadlift", upgradedLoad: "Barbell", cue: "Barbell RDL — hip hinge, not a squat." },
   ],
   "Squat Jumps": [

@@ -321,3 +321,34 @@ export const getLeaderboard = query({
     return stats.sort((a, b) => b.avgRepsPerWorkout - a.avgRepsPerWorkout);
   },
 });
+
+export const deleteUserWorkouts = mutation({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const logs = await ctx.db
+      .query("workoutLogs")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+
+    for (const log of logs) {
+      await ctx.db.delete(log._id);
+    }
+
+    return { deletedCount: logs.length };
+  },
+});
+
+export const getUserWorkoutHistory = query({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("workoutLogs")
+      .withIndex("by_user_date", (q) => q.eq("userId", args.userId))
+      .order("desc")
+      .collect();
+  },
+});

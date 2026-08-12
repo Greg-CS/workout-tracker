@@ -23,7 +23,9 @@ interface ExerciseCardProps {
   originalName?: string;
   durationSec?: number;
   userEquipment?: string[];
-  pr?: { exercise: string; bestSet: number; totalReps: number; lastDate: number };
+  pr?: { exercise: string; bestSet: number; totalReps: number; lastDate: number; bestLoad?: string };
+  children?: React.ReactNode;
+  className?: string;
 }
 
 export function ExerciseCard({
@@ -41,6 +43,8 @@ export function ExerciseCard({
   durationSec,
   userEquipment = ["bodyweight"],
   pr,
+  children,
+  className,
 }: ExerciseCardProps) {
   const info = exerciseInfo[name];
   const [expanded, setExpanded] = useState(false);
@@ -53,7 +57,7 @@ export function ExerciseCard({
   );
 
   return (
-    <div className="overflow-hidden rounded-xl border border-secondary/25 bg-white shadow-sm shadow-secondary/10 transition-all hover:shadow-md dark:border-foreground/10 dark:bg-foreground/5">
+    <div className={cn("overflow-hidden rounded-xl border border-secondary/25 bg-white shadow-sm shadow-secondary/10 transition-all hover:shadow-md dark:border-foreground/10 dark:bg-foreground/5", className)}>
       <div className="flex flex-col md:flex-row gap-4 p-4 items-center justify-between">
         <ExerciseImage name={name} size="md" />
 
@@ -76,6 +80,7 @@ export function ExerciseCard({
               <Badge variant="outline" className="gap-1 text-primary">
                 <Trophy className="h-3 w-3" />
                 PR: {pr.bestSet} reps
+                {pr.bestLoad && pr.bestLoad !== "bodyweight" && ` @ ${pr.bestLoad}`}
               </Badge>
             )}
           </div>
@@ -187,6 +192,7 @@ export function ExerciseCard({
             </div>
           </div>
         )}
+        {children}
       </div>
     </div>
   );
