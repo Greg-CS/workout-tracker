@@ -1,8 +1,8 @@
 {
   "name": "Gym snooze",
-  "short_name": "Workout",
+  "short_name": "Gym snooze",
   "description": "Track your workouts, manage regimens, and monitor progress.",
-  "start_url": "/dashboard",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#051014",
   "theme_color": "#759aab",
