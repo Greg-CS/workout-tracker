@@ -63,7 +63,7 @@ export default function UserDetailPage({
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{profile.name}</h1>
-          <p className="text-sm text-foreground/50">{profile.email}</p>
+          {/* <p className="text-sm text-foreground/50">{profile.email}</p> */}
         </div>
         {!isMe && userData && isFollowing !== undefined && (
           <Button
