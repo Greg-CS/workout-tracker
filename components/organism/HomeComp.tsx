@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { Dumbbell, FileText, ClipboardList, History, ArrowRight } from "lucide-react";
+import { Dumbbell, ArrowRight } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import dynamic from "next/dynamic";
+
+const MagicBento = dynamic(() => import("@/components/MagicBento"), { ssr: false });
 
 export const HomeComp = () => {
   const { isSignedIn, isLoaded } = useAuth();
@@ -18,7 +21,7 @@ export const HomeComp = () => {
   }, [isLoaded, isSignedIn, router])
 
   return (
-    <div className="flex min-h-[calc(100vh-3.5rem)] flex-col items-center justify-center p-8">
+    <div className="flex min-h-[calc(100vh-3.5rem)] flex-col items-center justify-center p-8 overflow-hidden">
       <div className="max-w-3xl text-center">
         <div className="mb-6 flex justify-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
@@ -42,21 +45,8 @@ export const HomeComp = () => {
             <Button size="lg" variant="outline">Sign In</Button>
           </Link>
         </div>
-        <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {[
-            { icon: Dumbbell, label: "7 Templates" },
-            { icon: ClipboardList, label: "Set-by-Set Logging" },
-            { icon: FileText, label: "PDF Export" },
-            { icon: History, label: "Track PRs" },
-          ].map((feature) => {
-            const Icon = feature.icon;
-            return (
-              <div key={feature.label} className="flex flex-col items-center gap-2 rounded-xl border border-secondary/25 bg-white p-4 shadow-sm shadow-secondary/10 dark:border-foreground/10 dark:bg-foreground/5">
-                <Icon className="h-5 w-5 text-primary" />
-                <span className="text-sm font-medium text-foreground/70">{feature.label}</span>
-              </div>
-            );
-          })}
+        <div className="mt-16 w-full max-w-6xl">
+          <MagicBento />
         </div>
       </div>
     </div>

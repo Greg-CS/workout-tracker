@@ -56,7 +56,7 @@ export default function RootLayout({
           <ConvexClientProvider>
             <ThemeProvider>
               <Navbar />
-              <main className="flex-1">{children}</main>
+              <main className="flex-1 pt-24">{children}</main>
               <ServiceWorkerRegister />
             </ThemeProvider>
           </ConvexClientProvider>
