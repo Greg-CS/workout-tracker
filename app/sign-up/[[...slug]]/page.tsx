@@ -1,9 +1,21 @@
 import { SignUp } from "@clerk/nextjs";
+import Image from "next/image";
 
 export default function SignUpPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-secondary/10 via-white to-primary/5 dark:from-foreground/5 dark:via-background dark:to-primary/10">
-      <SignUp />
+    <div className="flex min-h-[75dvh] justify-center items-center">
+      <div className="w-[50%] flex items-center justify-center">
+        <SignUp />
+      </div>
+      <div className="w-[50%] flex items-center justify-center">
+        <Image
+          src="/app_images/login-pic.jpg"
+          alt="Gym snooze"
+          width={400}
+          height={400}
+          className="object-cover rounded-2xl"
+        />
+      </div>
     </div>
   );
 }

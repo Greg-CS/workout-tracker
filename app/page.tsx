@@ -1,5 +1,9 @@
-import { HomeComp } from "@/components/organism/HomeComp";
+import { Hero } from "@/components/organism/Hero";
 
 export default function Home() {
-  return <HomeComp />;
+  return (
+    <div>
+      <Hero />
+    </div>
+  );
 }
