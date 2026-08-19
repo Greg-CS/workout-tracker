@@ -6,6 +6,7 @@ import {
   ClipboardList,
   History,
   Users,
+  UserRoundArrowLeft,
   Trophy,
 } from "lucide-react";
 
@@ -34,6 +35,11 @@ const dockItems = [
     title: "History",
     icon: <History className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
     href: "/history",
+  },
+  {
+    title: "Signout",
+    icon: <UserRoundArrowLeft className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
+    href: "/sign-out",
   },
   // {
   //   title: "Users",

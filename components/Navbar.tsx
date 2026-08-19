@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { UserButton, useAuth, useUser } from "@clerk/nextjs";
-import { ThemeToggle } from "./ThemeToggle";
 import { useUserData } from "@/lib/useUserData";
+import { ThemeToggle } from "./ThemeToggle";
 import Image from "next/image";
 import { useEffect } from "react";
 import ProfileDropdown from "@/components/organism/profile-dropdown";
@@ -46,13 +46,11 @@ export function Navbar() {
               <Button size="lg" variant="outline">Sign Up</Button>
             </Link>
           </div>
-          {isLoaded && isSignedIn && profile ? (
+          {isLoaded && isSignedIn && profile && (
             // <ProfileDropdown data={profile} />
             <>
               <Link href="/dashboard" className="p-2 rounded-lg bg-background">Dashboard</Link>
             </>
-          ) : (
-            <UserButton />
           )}
         </div>
       </nav>
