@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function SignUpPage() {
   return (
-    <div className="flex min-h-[75dvh] justify-center items-center">
+    <div className="grid md:flex min-h-[75dvh] justify-center items-center">
       <div className="w-[50%] flex items-center justify-center">
         <SignUp />
       </div>
