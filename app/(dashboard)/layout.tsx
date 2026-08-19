@@ -10,11 +10,11 @@ import {
 } from "lucide-react";
 
 const dockItems = [
-  {
-    title: "Home",
-    icon: <Home className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
-    href: "/",
-  },
+  // {
+  //   title: "Home",
+  //   icon: <Home className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
+  //   href: "/",
+  // },
   {
     title: "Dashboard",
     icon: <LayoutDashboard className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
