@@ -51,6 +51,7 @@
 }
 
 :root {
+  color-scheme: light;
   /* Custom palette */
   --tea-green: #d4e4bc;
   --steel-blue: #759aab;
@@ -95,6 +96,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   /* Custom palette */
   --tea-green: #d4e4bc;
   --steel-blue: #759aab;

@@ -7,7 +7,6 @@
   --purple-border: rgba(132, 0, 255, 0.8);
   --border-color: #2F293A;
   --background-dark: #120F17;
-  color-scheme: light dark;
 }
 
 .card-grid {
@@ -50,6 +49,7 @@
 .magic-bento-card__content {
   display: flex;
   position: relative;
+  z-index: 2;
   color: var(--white);
 }
 
@@ -150,22 +150,24 @@
   inset: 0;
   padding: 6px;
   background: radial-gradient(
-    var(--glow-radius) circle at var(--glow-x) var(--glow-y),
+    circle var(--glow-radius) at var(--glow-x) var(--glow-y),
     rgba(132, 0, 255, calc(var(--glow-intensity) * 0.8)) 0%,
     rgba(132, 0, 255, calc(var(--glow-intensity) * 0.4)) 30%,
     transparent 60%
   );
   border-radius: inherit;
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
+  -webkit-mask-image:
+    linear-gradient(#fff 0 0),
     linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#fff 0 0) content-box,
+  -webkit-mask-clip: content-box, border-box;
+  -webkit-mask-composite: destination-out;
+  mask-image:
+    linear-gradient(#fff 0 0),
     linear-gradient(#fff 0 0);
+  mask-clip: content-box, border-box;
   mask-composite: exclude;
   pointer-events: none;
-  opacity: 1;
+  opacity: var(--glow-intensity, 0);
   transition: opacity 0.3s ease;
   z-index: 1;
 }

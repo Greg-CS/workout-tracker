@@ -4,7 +4,6 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { Navbar } from "@/components/Navbar";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 const geistMono = Geist_Mono({
@@ -55,7 +54,7 @@ export default function RootLayout({
         <ClerkProvider>
           <ConvexClientProvider>
             <ThemeProvider>
-              <Navbar />
+
               <main className="flex-1 pt-24">{children}</main>
               <ServiceWorkerRegister />
             </ThemeProvider>

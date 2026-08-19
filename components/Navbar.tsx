@@ -24,7 +24,7 @@ export function Navbar() {
       : undefined;
 
   return (
-    <header className={`${typeof window !== "undefined" && window.location.pathname === "/" ? "" : "hidden"} fixed top-0 left-1/2 z-50 mt-10 w-[90%] md:w-[70%] -translate-x-1/2 rounded-full border-b border-secondary/20 bg-white/80 backdrop-blur-md dark:border-foreground/10 dark:bg-primary/80 ${isLoaded && isSignedIn ? 'hidden' : ''}`}>
+    <header className="fixed top-0 left-1/2 z-50 mt-10 w-[90%] md:w-[70%] -translate-x-1/2 rounded-full border-b border-secondary/20 bg-white/80 backdrop-blur-md dark:border-foreground/10 dark:bg-primary/80">
       <nav className="mx-auto flex h-14 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           <Image src="/applogo.svg" alt="Gym snooze" width={50} height={50} />

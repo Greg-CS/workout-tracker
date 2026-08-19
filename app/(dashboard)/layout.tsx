@@ -35,11 +35,11 @@ const dockItems = [
     icon: <History className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
     href: "/history",
   },
-  {
-    title: "Users",
-    icon: <Users className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
-    href: "/users",
-  },
+  // {
+  //   title: "Users",
+  //   icon: <Users className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
+  //   href: "/users",
+  // },
   {
     title: "Leaderboard",
     icon: <Trophy className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
